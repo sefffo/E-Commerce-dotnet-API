@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/Drawings/">
     <File Path="drawing.excalidraw1.excalidraw.png" />
+    <File Path="Specification design pattern.excalidraw.png" />
   </Folder>
   <Folder Name="/Infrastructure Layer/">
     <Project Path="ECommerce.Persistence/ECommerce.Persistence.csproj" />

@@ -2,6 +2,7 @@
 using ECommerce.Domain.Entities.ProductModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Services.Abstraction;
+using ECommerce.Services.Specifications;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,8 @@ namespace ECommerce.Services.Servicies
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
             var repo = unitOfWork.GetRepository<Product, int>();
-            var Products = await repo.GetAllAsync();
+            var spec = new ProductWithBrandAndTypeSpecification();
+            var Products = await repo.GetAllAsync(spec);
             //mapp from Brand Entity to the dto BrandDto
             var mappedProducts = mapper.Map<IEnumerable<ProductDto>>(Products);
             if (mappedProducts == null) { return null; }
