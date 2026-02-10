@@ -16,15 +16,34 @@ namespace ECommerce.Services.Specifications
     //we se it as abstract class because we want to inherit from it and we dont want to create an instance from it  
     internal abstract class BaseSpecification<TEntiy, TKey> : ISpecifications<TEntiy, TKey> where TEntiy : BaseEntity<TKey>
     {
-       
+
+
+
+
+        public int Take { get; private set; }
+
+        public int Skip { get; private set; }
+
+        public bool IsPaginationEnabled { get; private set; }
+
+        protected void ApplyPagination(int PageSize, int PageIndex)
+        {
+            IsPaginationEnabled = true;
+            Take = PageSize;
+            Skip = (PageIndex - 1) * PageSize;//there is a fourmula to calculate the skip value => (PageIndex - 1) * PageSize
+
+        }
+
+
+
 
 
         public Expression<Func<TEntiy, bool>> Criteria { get; } // we can add criteria to the specification to filter the data
 
-      
 
-        protected BaseSpecification(Expression<Func<TEntiy, bool>> criteriaExpression) 
-            //to make it mandatory to pass the criteria expression when we create a specification
+
+        protected BaseSpecification(Expression<Func<TEntiy, bool>> criteriaExpression)
+        //to make it mandatory to pass the criteria expression when we create a specification
         {
             Criteria = criteriaExpression;
         }
@@ -49,6 +68,9 @@ namespace ECommerce.Services.Specifications
 
 
         public ICollection<Expression<Func<TEntiy, object>>> IncludeExplressions { get; } = [];
+
+
+
         // we can add more common properties for all specifications like order by , pagination , etc
 
         // we can add a method to add include expressions to the collection
@@ -58,6 +80,6 @@ namespace ECommerce.Services.Specifications
             IncludeExplressions.Add(includeExpression);
         }
 
-      
+
     }
 }

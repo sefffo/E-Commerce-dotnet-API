@@ -10,10 +10,18 @@ namespace ECommerce.Services.Specifications
     {
 
 
+        
+        //adding Pagination
 
-        //adding order specification 
 
 
+        
+
+
+        
+
+
+        
 
 
 
@@ -72,6 +80,10 @@ namespace ECommerce.Services.Specifications
                     break;
 
             }
+
+
+
+            ApplyPagination(queryPrams.PageSize, queryPrams.PageIndex);
         }
     }
 }

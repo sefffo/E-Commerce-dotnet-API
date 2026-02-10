@@ -23,15 +23,22 @@ namespace ECommerce.Services.Servicies
             return mappedBrands;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(ProductQueryPrams queryPrams)
+        public async Task<PaginatedResult<ProductDto>> GetAllProductsAsync(ProductQueryPrams queryPrams)
         {
             var repo = unitOfWork.GetRepository<Product, int>();
             var spec = new ProductWithBrandAndTypeSpecification(queryPrams);
             var Products = await repo.GetAllAsync(spec);
             //mapp from Brand Entity to the dto BrandDto
             var mappedProducts = mapper.Map<IEnumerable<ProductDto>>(Products);
+
+            var CountofReturnedProducts = mappedProducts.Count();
+
+            var CountSpec = new ProductCountSpecifications(queryPrams);
+            var CountOfAllProducts = await repo.CountAsync(CountSpec);
             if (mappedProducts == null) { return null; }
-            return mappedProducts;
+
+
+            return new PaginatedResult<ProductDto>( queryPrams.PageIndex, queryPrams.PageSize, CountOfAllProducts ,mappedProducts);
         }
 
         public async Task<IEnumerable<TypeDto>> GetAllTypesAsync()
@@ -47,7 +54,7 @@ namespace ECommerce.Services.Servicies
         public async Task<ProductDto> GetProductByIdAsync(int id)
         {
             var repo = unitOfWork.GetRepository<Product, int>();
-            var spec = new ProductWithBrandAndTypeSpecification(id) ;
+            var spec = new ProductWithBrandAndTypeSpecification(id);
             var Product = await repo.GetByIdAsync(spec);
             var mappedProduct = mapper.Map<ProductDto>(Product);
             if (mappedProduct == null) return null;

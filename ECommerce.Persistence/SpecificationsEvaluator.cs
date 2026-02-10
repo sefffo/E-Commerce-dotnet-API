@@ -22,7 +22,6 @@ namespace ECommerce.Persistence
             if (specifications is not null)
             {
 
-
                 if (specifications.OrderBy is not null)
                 {
                     Query = Query.OrderBy(specifications.OrderBy);
@@ -38,6 +37,12 @@ namespace ECommerce.Persistence
                     Query = Query.Where(specifications.Criteria);
                 }
 
+
+                if (specifications.IsPaginationEnabled)
+                {
+                    Query = Query.Skip(specifications.Skip).Take(specifications.Take);
+                }
+
                 if (specifications.IncludeExplressions is not null && specifications.IncludeExplressions.Any())
                 {
                     //    foreach (var includeExp in specifications.IncludeEcplressions)
@@ -50,6 +55,7 @@ namespace ECommerce.Persistence
 
                     //context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)
                 }
+
             }
 
 

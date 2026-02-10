@@ -14,7 +14,10 @@ namespace ECommerce.Domain.Interfaces
 
         Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TEntity,Tkey>specifications);
 
-
+        //to get it with the specifications and the specifications will be used to filter the data and
+        //return only the data that we need and also to include the related data if we need it and also to order the data
+        //if we need it and also to paginate the data if we need it
+        Task<int> CountAsync(ISpecifications<TEntity,Tkey> specifications);
 
         Task<TEntity> GetByIdAsync(ISpecifications<TEntity,Tkey> specifications);
 
