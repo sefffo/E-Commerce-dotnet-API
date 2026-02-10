@@ -14,7 +14,10 @@ namespace ECommerce.Domain.Interfaces
         public Expression<Func<TEntity, bool>> Criteria { get; }
 
 
+        public Expression<Func<TEntity, object>> OrderBy { get; }
 
+        public Expression<Func<TEntity, object>> OrderByDescending { get; }
+        
 
     }
 }

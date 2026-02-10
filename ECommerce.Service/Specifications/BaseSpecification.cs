@@ -16,11 +16,12 @@ namespace ECommerce.Services.Specifications
     //we se it as abstract class because we want to inherit from it and we dont want to create an instance from it  
     internal abstract class BaseSpecification<TEntiy, TKey> : ISpecifications<TEntiy, TKey> where TEntiy : BaseEntity<TKey>
     {
-        public ICollection<Expression<Func<TEntiy, object>>> IncludeExplressions{ get; } = [];
+       
 
 
         public Expression<Func<TEntiy, bool>> Criteria { get; } // we can add criteria to the specification to filter the data
 
+      
 
         protected BaseSpecification(Expression<Func<TEntiy, bool>> criteriaExpression) 
             //to make it mandatory to pass the criteria expression when we create a specification
@@ -29,6 +30,25 @@ namespace ECommerce.Services.Specifications
         }
 
 
+
+        public Expression<Func<TEntiy, object>> OrderBy { get; private set; }
+        protected void OrderByExpression(Expression<Func<TEntiy, object>> orderByExpression)
+        {
+            OrderBy = orderByExpression;
+        }
+
+        public Expression<Func<TEntiy, object>> OrderByDescending { get; private set; }
+        protected void OrderByDescindingExpression(Expression<Func<TEntiy, object>> orderByDescendingExpression)
+        {
+            OrderByDescending = orderByDescendingExpression;
+        }
+
+
+
+
+
+
+        public ICollection<Expression<Func<TEntiy, object>>> IncludeExplressions { get; } = [];
         // we can add more common properties for all specifications like order by , pagination , etc
 
         // we can add a method to add include expressions to the collection

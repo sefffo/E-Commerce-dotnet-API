@@ -3,6 +3,7 @@ using ECommerce.Domain.Entities.ProductModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Services.Abstraction;
 using ECommerce.Services.Specifications;
+using ECommerce.SharedLibirary;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 using System;
 using System.Collections.Generic;
@@ -22,10 +23,10 @@ namespace ECommerce.Services.Servicies
             return mappedBrands;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(int ? brandId , int ? typeId)
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(ProductQueryPrams queryPrams)
         {
             var repo = unitOfWork.GetRepository<Product, int>();
-            var spec = new ProductWithBrandAndTypeSpecification(brandId ,typeId);
+            var spec = new ProductWithBrandAndTypeSpecification(queryPrams);
             var Products = await repo.GetAllAsync(spec);
             //mapp from Brand Entity to the dto BrandDto
             var mappedProducts = mapper.Map<IEnumerable<ProductDto>>(Products);

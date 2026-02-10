@@ -1,4 +1,5 @@
 ﻿using ECommerce.Services.Abstraction;
+using ECommerce.SharedLibirary;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,9 +18,9 @@ namespace ECommerce.Presentation.Controllers
 
         [HttpGet]
         //baseUrl: api/products
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProductsAsync([FromQuery] int? brandId , [FromQuery] int? typeId)
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProductsAsync([FromQuery] ProductQueryPrams queryPrams)
         {
-            var products = await servivce.GetAllProductsAsync(brandId , typeId);
+            var products = await servivce.GetAllProductsAsync(queryPrams);
 
             //must be a response with status code 200 and the list of products in the body
             //on a working project the response must hava a certain form 

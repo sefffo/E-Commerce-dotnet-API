@@ -1,4 +1,4 @@
-﻿ using ECommerce.Domain.Entities;
+﻿using ECommerce.Domain.Entities;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +22,18 @@ namespace ECommerce.Persistence
             if (specifications is not null)
             {
 
-                if(specifications.Criteria is not null)
+
+                if (specifications.OrderBy is not null)
+                {
+                    Query = Query.OrderBy(specifications.OrderBy);
+                }
+                if (specifications.OrderByDescending is not null)
+                {
+                    Query = Query.OrderByDescending(specifications.OrderByDescending);
+                }
+
+
+                if (specifications.Criteria is not null)
                 {
                     Query = Query.Where(specifications.Criteria);
                 }
@@ -34,12 +45,12 @@ namespace ECommerce.Persistence
                     //        Query = Query.Include(includeExp);
                     //    }
 
-                                                                //acummlate  ============ el hadifo 
+                                                                                        //acummlate  ============ el hadifo 
                     Query = specifications.IncludeExplressions.Aggregate(Query, (current, include) => current.Include(include));
 
                     //context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)
                 }
-            } 
+            }
 
 
 

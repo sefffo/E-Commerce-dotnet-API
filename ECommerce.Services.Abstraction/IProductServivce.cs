@@ -1,4 +1,5 @@
-﻿using ECommerce.SharedLibirary.DTO_s.ProductDtos;
+﻿using ECommerce.SharedLibirary;
+using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 
 
 namespace ECommerce.Services.Abstraction
@@ -6,7 +7,7 @@ namespace ECommerce.Services.Abstraction
     public interface IProductServivce
     {
 
-        Task<IEnumerable<ProductDto>> GetAllProductsAsync(int ?brandId , int? typeId);
+        Task<IEnumerable<ProductDto>> GetAllProductsAsync(ProductQueryPrams queryPrams);
 
         Task<ProductDto> GetProductByIdAsync(int id);
 
@@ -18,7 +19,7 @@ namespace ECommerce.Services.Abstraction
 
 
 
-
+        
 
     }
 }
