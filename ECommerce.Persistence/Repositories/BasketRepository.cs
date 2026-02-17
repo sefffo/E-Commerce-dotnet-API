@@ -12,6 +12,10 @@ namespace ECommerce.Persistence.Repositories
     //there's IDistributedcache to use with any caching service 
 
     //IConnectionMultiplixer used for a certain tech for only ====> redis 
+
+
+
+    // its diffrent repo bec it use difffrent database 
     public class BasketRepository : IBasketRepository
     {
 

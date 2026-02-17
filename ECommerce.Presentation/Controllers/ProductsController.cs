@@ -1,4 +1,5 @@
-﻿using ECommerce.Services.Abstraction;
+﻿using ECommerce.Presentation.Attributes;
+using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ namespace ECommerce.Presentation.Controllers
     {
 
         [HttpGet]
+        [RedisCache(10)]
         //baseUrl: api/products
         public async Task<ActionResult<PaginatedResult<ProductDto>>> GetAllProductsAsync([FromQuery] ProductQueryPrams queryPrams)
         {
@@ -29,21 +31,32 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpGet("{id}")]
+        [RedisCache(10)]
         //baseurl : api/products/{id}
         public async Task<ActionResult<ProductDto>> GetProductByIdAsync(int id)
         {
-            var product = await servivce.GetProductByIdAsync(id);
-            if (product == null)
+
+            try
             {
-                return NotFound();
+                var product = await servivce.GetProductByIdAsync(id);
+                if (product == null)
+                {
+                    return NotFound($"Product With Id : {id} Not Found");
+                }
+                return Ok(product);
             }
-            return Ok(product);
+            catch(Exception ex)
+            {
+
+            }
+           
 
         }
 
         //get all brands
         //baseUrl : api/products/brands
         [HttpGet("brands")]
+        [RedisCache]
         public async Task<ActionResult<IEnumerable<BrandDto>>> GetAllBrandsAsync()
         {
             var brands = await servivce.GetAllBrandsAsync();
@@ -52,6 +65,7 @@ namespace ECommerce.Presentation.Controllers
         }
 
         [HttpGet("types")]
+        [RedisCache]
         ///baseUrl : api/products/types
         public async Task<ActionResult<IEnumerable<TypeDto>>> GetAllTypesAsync()
         {

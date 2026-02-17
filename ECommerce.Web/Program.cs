@@ -24,6 +24,10 @@ namespace ECommerce.Web
 
             #region Registers
 
+            builder.Services.AddScoped<ICacheService, CacheService>();
+
+            builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+
             builder.Services.AddScoped<IBasketService, BasketService>();
 
             builder.Services.AddScoped<IBasketRepository, BasketRepository>();
