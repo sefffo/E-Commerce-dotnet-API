@@ -35,21 +35,8 @@ namespace ECommerce.Presentation.Controllers
         //baseurl : api/products/{id}
         public async Task<ActionResult<ProductDto>> GetProductByIdAsync(int id)
         {
-
-            try
-            {
-                var product = await servivce.GetProductByIdAsync(id);
-                if (product == null)
-                {
-                    return NotFound($"Product With Id : {id} Not Found");
-                }
-                return Ok(product);
-            }
-            catch(Exception ex)
-            {
-
-            }
-           
+            var product = await servivce.GetProductByIdAsync(id);
+            return Ok(product);
 
         }
 

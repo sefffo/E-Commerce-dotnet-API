@@ -6,7 +6,11 @@ using ECommerce.Persistence.Repositories;
 using ECommerce.Services.Abstraction;
 using ECommerce.Services.MappingProfiles;
 using ECommerce.Services.Servicies;
+using ECommerce.Web.CustomMiddleWares;
 using ECommerce.Web.Extensions;
+using ECommerce.Web.Factories;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Reflection;
@@ -23,6 +27,14 @@ namespace ECommerce.Web
 
 
             #region Registers
+
+
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = ApiResponseFactory.GenerateApiValidationResponse;
+
+            });
+
 
             builder.Services.AddScoped<ICacheService, CacheService>();
 
@@ -86,6 +98,35 @@ namespace ECommerce.Web
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+
+            //Not the Best Practice
+
+            //app.Use(async (context, next) =>
+            //{
+            //    try
+            //    {
+            //        await next.Invoke(context);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine(ex.Message);
+            //        //return custom exceptions
+            //        // Hedar change 
+
+            //        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+
+            //        await context.Response.WriteAsJsonAsync(new
+            //        {
+            //            StatusCode = StatusCodes.Status500InternalServerError, //as a general one first 
+            //            Error = ex.Message
+            //        });
+            //    }
+            //});
+
+            app.UseMiddleware<ExceptionHandlerMiddleWare>();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

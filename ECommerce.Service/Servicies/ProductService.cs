@@ -2,6 +2,7 @@
 using ECommerce.Domain.Entities.ProductModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Services.Abstraction;
+using ECommerce.Services.Exceptions;
 using ECommerce.Services.Specifications;
 using ECommerce.SharedLibirary;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
@@ -17,6 +18,11 @@ namespace ECommerce.Services.Servicies
         {
             var repo = unitOfWork.GetRepository<ProductBrand, int>();
             var brands = await repo.GetAllAsync();
+
+            if(brands is null )
+            {
+                throw new BrandsNotFoundException();
+            }
             //mapp from Brand Entity to the dto BrandDto
             var mappedBrands = mapper.Map<IEnumerable<BrandDto>>(brands);
             if (mappedBrands == null) { return null; }
@@ -28,6 +34,13 @@ namespace ECommerce.Services.Servicies
             var repo = unitOfWork.GetRepository<Product, int>();
             var spec = new ProductWithBrandAndTypeSpecification(queryPrams);
             var Products = await repo.GetAllAsync(spec);
+
+
+            if(Products is null)
+            {
+                throw new ProductsNotFoundException();
+            }
+           
             //mapp from Brand Entity to the dto BrandDto
             var mappedProducts = mapper.Map<IEnumerable<ProductDto>>(Products);
 
@@ -45,6 +58,10 @@ namespace ECommerce.Services.Servicies
         {
             var repo = unitOfWork.GetRepository<ProductType, int>();
             var Types = await repo.GetAllAsync();
+            if(Types is null)
+            {
+                throw new TypessNotFoundException(); 
+            }
             //mapp from Brand Entity to the dto BrandDto
             var mappedTypes = mapper.Map<IEnumerable<TypeDto>>(Types);
             if (mappedTypes == null) return null;
@@ -56,6 +73,10 @@ namespace ECommerce.Services.Servicies
             var repo = unitOfWork.GetRepository<Product, int>();
             var spec = new ProductWithBrandAndTypeSpecification(id);
             var Product = await repo.GetByIdAsync(spec);
+            if (Product is null)
+            {
+                throw new ProductNotFoundException(id);
+            }
             var mappedProduct = mapper.Map<ProductDto>(Product);
             if (mappedProduct == null) return null;
             return mappedProduct;

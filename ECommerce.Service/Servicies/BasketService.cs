@@ -2,6 +2,7 @@
 using ECommerce.Domain.Entities.BasketModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Services.Abstraction;
+using ECommerce.Services.Exceptions;
 using ECommerce.SharedLibirary.DTO_s.BasketDTOs;
 
 namespace ECommerce.Services.Servicies
@@ -23,7 +24,17 @@ namespace ECommerce.Services.Servicies
         }
 
         public async Task<bool> DeleteBasketAsync(string id)
-            => await repository.DeleteBasketAsync(id);
+        {
+
+            if(id is null )
+            {
+                throw new BasketNotFoundException(id);
+            }
+
+
+            return await repository.DeleteBasketAsync(id);
+
+        }
 
 
         public async Task<BasketDTO> GetBasketAsync(string id)
@@ -32,7 +43,7 @@ namespace ECommerce.Services.Servicies
 
             if (basket is null)
             {
-                throw new Exception("No basket created due to server error");
+                throw new BasketNotFoundException(id);
             }
 
 
