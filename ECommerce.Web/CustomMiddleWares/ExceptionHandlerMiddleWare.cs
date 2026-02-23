@@ -15,6 +15,10 @@ namespace ECommerce.Web.CustomMiddleWares
 
                 await next.Invoke(httpContext);
 
+
+  
+
+
                 await HandleNotFoundEndPoint(httpContext);
 
 
@@ -22,10 +26,10 @@ namespace ECommerce.Web.CustomMiddleWares
             }
             catch (Exception ex)
             {
-                //loging 
+                //logging 
 
 
-                logger.LogError(ex, "Somthing Went wrong");
+                logger.LogError(ex, "Something Went wrong");
 
                 //Custom Error Response 
 
@@ -67,7 +71,7 @@ namespace ECommerce.Web.CustomMiddleWares
 
         private static async Task HandleNotFoundEndPoint(HttpContext httpContext)
         {
-            if (httpContext.Response.StatusCode == StatusCodes.Status404NotFound)
+            if (httpContext.Response.StatusCode == StatusCodes.Status404NotFound && !httpContext.Response.HasStarted)
             {
                 var response = new ProblemDetails()
                 {

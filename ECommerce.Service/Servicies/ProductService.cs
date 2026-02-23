@@ -5,6 +5,7 @@ using ECommerce.Services.Abstraction;
 using ECommerce.Services.Exceptions;
 using ECommerce.Services.Specifications;
 using ECommerce.SharedLibirary;
+using ECommerce.SharedLibirary.CommonResult;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace ECommerce.Services.Servicies
             }
             //mapp from Brand Entity to the dto BrandDto
             var mappedBrands = mapper.Map<IEnumerable<BrandDto>>(brands);
-            if (mappedBrands == null) { return null; }
+            //if (mappedBrands == null) { return null; }
             return mappedBrands;
         }
 
@@ -48,7 +49,7 @@ namespace ECommerce.Services.Servicies
 
             var CountSpec = new ProductCountSpecifications(queryPrams);
             var CountOfAllProducts = await repo.CountAsync(CountSpec);
-            if (mappedProducts == null) { return null; }
+            //if (mappedProducts == null) { return null; }
 
 
             return new PaginatedResult<ProductDto>( queryPrams.PageIndex, queryPrams.PageSize, CountOfAllProducts ,mappedProducts);
@@ -60,25 +61,26 @@ namespace ECommerce.Services.Servicies
             var Types = await repo.GetAllAsync();
             if(Types is null)
             {
-                throw new TypessNotFoundException(); 
+                throw new TypesNotFoundException(); 
             }
             //mapp from Brand Entity to the dto BrandDto
             var mappedTypes = mapper.Map<IEnumerable<TypeDto>>(Types);
-            if (mappedTypes == null) return null;
+            //if (mappedTypes == null) return null;
             return mappedTypes;
         }
 
-        public async Task<ProductDto> GetProductByIdAsync(int id)
+        public async Task<Result<ProductDto>> GetProductByIdAsync(int id)
         {
             var repo = unitOfWork.GetRepository<Product, int>();
             var spec = new ProductWithBrandAndTypeSpecification(id);
             var Product = await repo.GetByIdAsync(spec);
             if (Product is null)
             {
-                throw new ProductNotFoundException(id);
+               return Error.NotFound("Product.NotFound" , $"Product With {id} is Not Found");
+
             }
             var mappedProduct = mapper.Map<ProductDto>(Product);
-            if (mappedProduct == null) return null;
+            //if (mappedProduct == null) return null;
             return mappedProduct;
         }
     }

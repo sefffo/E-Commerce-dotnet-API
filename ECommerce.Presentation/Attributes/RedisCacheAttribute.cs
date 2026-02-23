@@ -19,24 +19,56 @@ namespace ECommerce.Presentation.Attributes
 
 
 
+        //public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        //{
+
+        //    //Get  the Cache service  ==> done 
+        //    var CacheService = context.HttpContext.RequestServices.GetRequiredService<ICacheService>();
+
+
+        //    //generate the cahceKey first 
+        //    var CacheKey = CreateCacheKey(context.HttpContext.Request);
+
+
+        //    //check if the chached data needed in context exsist 
+        //    var cacheValue = await CacheService.GetAsync(CacheKey);
+        //    // if yes return the data and then skip the end point request 
+
+        //    if (cacheValue is not null)
+        //    {
+
+        //        context.Result = new ContentResult()
+        //        {
+        //            Content = cacheValue,
+        //            ContentType = "application/json",
+        //            StatusCode = StatusCodes.Status200OK,
+        //        };
+        //        return;
+        //    }
+        //    // if no request the end point  and the if the response is 200 OK cache it 
+
+        //    var ExcutedContext = await next.Invoke();
+
+        //    if (ExcutedContext.Result is OkObjectResult result)
+        //    {
+        //        await CacheService.setAsync(CacheKey, result.Value, TimeSpan.FromMinutes(_Time));
+        //    }
+
+        //}
+
+
+
+
+
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-
-            //Get  the Cache service  ==> done 
             var CacheService = context.HttpContext.RequestServices.GetRequiredService<ICacheService>();
-
-
-            //generate the cahceKey first 
             var CacheKey = CreateCacheKey(context.HttpContext.Request);
 
-
-            //check if the chached data needed in context exsist 
             var cacheValue = await CacheService.GetAsync(CacheKey);
-            // if yes return the data and then skip the end point request 
 
             if (cacheValue is not null)
             {
-
                 context.Result = new ContentResult()
                 {
                     Content = cacheValue,
@@ -45,35 +77,24 @@ namespace ECommerce.Presentation.Attributes
                 };
                 return;
             }
-            // if no request the end point  and the if the response is 200 OK cache it 
 
-            var ExcutedContext = await next.Invoke();
+            var executedContext = await next.Invoke();
 
-            if (ExcutedContext.Result is OkObjectResult result)
+            // ✅ 1. Skip caching if the action threw an exception
+            if (executedContext.Exception is not null) return;
+
+            // ✅ 2. Only cache successful 200 OK results
+            if (executedContext.Result is OkObjectResult result)
             {
-                await CacheService.setAsync(CacheKey, result.Value, TimeSpan.FromMinutes(_Time));
+                try // ✅ 3. Wrap setAsync — Redis being down must not crash the request
+                {
+                    await CacheService.setAsync(CacheKey, result.Value, TimeSpan.FromMinutes(_Time));
+                }
+                catch (Exception)
+                {
+                    // Caching failed silently — response is still valid, request continues normally
+                }
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         }
 
         private string CreateCacheKey(HttpRequest request)

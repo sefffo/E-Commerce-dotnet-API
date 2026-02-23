@@ -12,9 +12,8 @@ using System.Text;
 namespace ECommerce.Presentation.Controllers
 {
 
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController(IProductServivce servivce) : ControllerBase
+ 
+    public class ProductsController(IProductServivce servivce) : ApiBaseController
     {
 
         [HttpGet]
@@ -31,12 +30,13 @@ namespace ECommerce.Presentation.Controllers
 
 
         [HttpGet("{id}")]
-        [RedisCache(10)]
+        //[RedisCache(10)]
         //baseurl : api/products/{id}
         public async Task<ActionResult<ProductDto>> GetProductByIdAsync(int id)
         {
             var product = await servivce.GetProductByIdAsync(id);
-            return Ok(product);
+
+            return HandleResult<ProductDto>(product) ;
 
         }
 

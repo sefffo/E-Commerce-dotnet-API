@@ -18,7 +18,7 @@ namespace ECommerce.Services.Exceptions
 
     public sealed class BrandNotFoundException(int id) : NotFoundException($"Brand with {id} Not Found");
 
-    public sealed class TypessNotFoundException() : NotFoundException("No Types in the Database");
+    public sealed class TypesNotFoundException() : NotFoundException("No Types in the Database");
 
     public sealed class typeNotFoundException(int id) : NotFoundException($"Type with {id} Not Found");
 

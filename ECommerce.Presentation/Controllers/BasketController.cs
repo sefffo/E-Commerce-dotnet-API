@@ -5,9 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace ECommerce.Presentation.Controllers
 {
 
-    [ApiController]
-    [Route("api/[Controller]")]
-    public class BasketController(IBasketService basketService) : ControllerBase
+   
+    public class BasketController(IBasketService basketService) : ApiBaseController
     {
         //GET : baseUrl/api/Baskets?id={id}
 
