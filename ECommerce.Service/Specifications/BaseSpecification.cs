@@ -14,7 +14,7 @@ namespace ECommerce.Services.Specifications
 
 
     //we se it as abstract class because we want to inherit from it and we dont want to create an instance from it  
-    internal abstract class BaseSpecification<TEntiy, TKey> : ISpecifications<TEntiy, TKey> where TEntiy : BaseEntity<TKey>
+    public abstract class BaseSpecification<TEntiy, TKey> : ISpecifications<TEntiy, TKey> where TEntiy : BaseEntity<TKey>
     {
 
 

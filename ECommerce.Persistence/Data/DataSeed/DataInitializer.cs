@@ -1,13 +1,10 @@
 ﻿using ECommerce.Domain.Entities;
+using ECommerce.Domain.Entities.OrderModule;
 using ECommerce.Domain.Entities.ProductModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ECommerce.Persistence.Data.DataSeed
 {
@@ -20,7 +17,8 @@ namespace ECommerce.Persistence.Data.DataSeed
                 var hasProducts = await context.Products.AnyAsync();
                 var hasBrands = await context.ProductBrands.AnyAsync();
                 var hasTypes = await context.ProductTypes.AnyAsync();
-                if (hasProducts && hasBrands && hasTypes) return;
+                var hasDeliveryMethods = await context.DeliveryMethods.AnyAsync();
+                if (hasProducts && hasBrands && hasTypes && hasDeliveryMethods) return;
 
                 if (!hasBrands)
                 {
@@ -31,16 +29,22 @@ namespace ECommerce.Persistence.Data.DataSeed
                 {
                     await SeedDataFromJson<ProductType, int>("types.json", context.ProductTypes);
 
-                    await context.SaveChangesAsync(); //products depend on brands and types, so we need to save them first before seeding products
+
                 }
+                await context.SaveChangesAsync(); //products depend on brands and types, so we need to save them first before seeding products
                 if (!hasProducts)
                 {
 
                     await SeedDataFromJson<Product, int>("products.json", context.Products);
-                    await context.SaveChangesAsync(); // Save changes after seeding products
+
 
                 }
+                if (!hasDeliveryMethods)
+                {
+                    await SeedDataFromJson<DeliveryMethod, int>("delivery.json", context.DeliveryMethods);
 
+                }
+                await context.SaveChangesAsync(); // Save changes after seeding products
             }
             catch (Exception ex)
             {
@@ -55,7 +59,7 @@ namespace ECommerce.Persistence.Data.DataSeed
             //S:\Road to full stack\BackEnd\Studying\Rev on API\EComm Aliaa tarek\ECommerceSolution\ECommerce.Persistence\Data\DataSeed\JSONFiles\
             var filePath = @"..\ECommerce.Persistence\Data\DataSeed\JSONFiles\" + fileName;
 
-            if (!File.Exists(filePath)) throw new FileNotFoundException ($"File {fileName} is not Found");
+            if (!File.Exists(filePath)) throw new FileNotFoundException($"File {fileName} is not Found");
 
             try
             {
@@ -67,9 +71,9 @@ namespace ECommerce.Persistence.Data.DataSeed
 
                 if (data == null) return;
 
-                 await dbset.AddRangeAsync(data);
+                await dbset.AddRangeAsync(data);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 // Log exception or handle it as needed
                 throw new Exception($"An error occurred while seeding data from {fileName}. , {ex}");
