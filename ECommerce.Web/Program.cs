@@ -34,12 +34,20 @@ namespace ECommerce.Web
 
 
 
+        
+
+            builder.Services.AddScoped<IOrderService, OrderService>();
+
+            //builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
-
-            builder.Services.AddIdentityCore<AppUser>()
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationIdentityDbContexts>();
+            builder.Services.AddIdentityCore<AppUser>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationIdentityDbContexts>();
             //this is the correct way to register identity core services with roles and entity framework stores, 
             //it allows us to use the identity services without the need for the full identity UI and cookie authentication, which is not needed in an API project
 

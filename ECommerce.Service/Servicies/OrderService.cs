@@ -80,7 +80,7 @@ namespace ECommerce.Services.Servicies
 
             var res = await unitOfWork.SaveChangesAsync();
 
-            if(res == 0)
+            if (res == 0)
             {
                 return Error.InternalServerError("Order creation failed", "An error occurred while creating the order");
             }
@@ -104,26 +104,38 @@ namespace ECommerce.Services.Servicies
             };
         }
 
-        public async Task<IEnumerable<DeliveryMethodDTO>> GetDeliveryMethodsAsync()
+        public async Task<Result<IEnumerable<DeliveryMethodDTO>>> GetDeliveryMethodsAsync()
         {
-            var DeliveryMethods = await unitOfWork.GetRepository<DeliveryMethod, int>().GetAllAsync();
-            return mapper.Map<IEnumerable<DeliveryMethod>, IEnumerable<DeliveryMethodDTO>>(DeliveryMethods);
+            var deliveryMethods = await unitOfWork.GetRepository<DeliveryMethod, int>().GetAllAsync();
+
+            if (!deliveryMethods.Any())
+                return Error.NotFound("No delivery methods found", "There are no delivery methods available");
+
+            var mapped = mapper.Map<IEnumerable<DeliveryMethodDTO>>(deliveryMethods);
+            return Result<IEnumerable<DeliveryMethodDTO>>.Ok(mapped);
         }
 
-
-        public async Task<IEnumerable<OrderToReturnDTO>> GetAllOrdersAsync(string Email)
+        public async Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersAsync(string email)
         {
-            var Spec = new OrderSpecifications(Email);
-            var orders = await unitOfWork.GetRepository<Order, Guid>().GetAllAsync(Spec);
-            return mapper.Map<IEnumerable<Order>, IEnumerable<OrderToReturnDTO>>(orders);
+            var spec = new OrderSpecifications(email);
+            var orders = await unitOfWork.GetRepository<Order, Guid>().GetAllAsync(spec);
+
+            if (!orders.Any())
+                return Error.NotFound("No orders found", $"No orders found for user with email: {email}");
+
+            var mapped = mapper.Map<IEnumerable<OrderToReturnDTO>>(orders);
+            return Result<IEnumerable<OrderToReturnDTO>>.Ok(mapped);
         }
 
-        public async Task<OrderToReturnDTO> GetOrderById(Guid OrderId)
+        public async Task<Result<OrderToReturnDTO>> GetOrderById(Guid orderId)
         {
-            var Spec = new OrderSpecifications(OrderId);
-            var order = await unitOfWork.GetRepository<Order, Guid>().GetByIdAsync(Spec);
-            return mapper.Map<Order, OrderToReturnDTO>(order);
+            var spec = new OrderSpecifications(orderId);
+            var order = await unitOfWork.GetRepository<Order, Guid>().GetByIdAsync(spec);
 
+            if (order is null)
+                return Error.NotFound("Order not found", $"Order with Id: {orderId} was not found");
+
+            return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
         }
     }
 }
