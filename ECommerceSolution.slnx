@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/Drawings/">
     <File Path="drawing.excalidraw1.excalidraw.png" />
+    <File Path="ExplainningRefreshToken.excalidraw.png" />
     <File Path="Identity Module.excalidraw.png" />
     <File Path="JWT Auth.excalidraw.png" />
     <File Path="ResultPattern.excalidraw.png" />
