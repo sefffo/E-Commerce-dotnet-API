@@ -1,10 +1,15 @@
 ﻿using ECommerce.Services.Abstraction;
+using ECommerce.SharedLibirary.CommonResult;
 using ECommerce.SharedLibirary.DTO_s.IdentityDTOs;
+using ECommerce.SharedLibirary.DTO_s.OrderDTOs;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ECommerce.Presentation.Controllers
 {
-    public class AuthenticationController(IAuthenticationService authenticationService) : ApiBaseController
+    public class AuthenticationController(Services.Abstraction.IAuthenticationService authenticationService) : ApiBaseController
     {
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
@@ -21,7 +26,42 @@ namespace ECommerce.Presentation.Controllers
         }
 
 
+        [HttpGet("check-email")]
+        public async Task<ActionResult<bool>> CheckEmail([FromQuery] string email)
+        {
+            var exists = await authenticationService.CheckEmailAsync(email);
+            return Ok(exists);
+        }
 
+
+
+
+        [HttpGet("CurrentUser")]
+        [Authorize]
+        public async Task<ActionResult<Result<UserDTO>>> GetCurrentUserAsync()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var token = await HttpContext.GetTokenAsync("access_token"); 
+
+            return HandleResult(await authenticationService.GetCurrentUserAsync(email!, token!));
+        }
+
+
+        [HttpGet("address")]
+        [Authorize]
+        public async Task<ActionResult<AddressDTO>> GetAddressAsync()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            return HandleResult(await authenticationService.GetUserAddressAsync(email!));
+        }
+
+        [HttpPut("address")]
+        [Authorize]
+        public async Task<ActionResult<AddressDTO>> UpdateAddressAsync(AddressDTO addressDto)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            return HandleResult(await authenticationService.UpdateUserAddressAsync(email!, addressDto));
+        }
 
     }
 }

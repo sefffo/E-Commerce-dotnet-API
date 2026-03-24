@@ -1,11 +1,12 @@
 ﻿using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary.DTO_s.BasketDTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.Presentation.Controllers
 {
 
-   
+    [Authorize]
     public class BasketController(IBasketService basketService) : ApiBaseController
     {
         //GET : baseUrl/api/Baskets?id={id}

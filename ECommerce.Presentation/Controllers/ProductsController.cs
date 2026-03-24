@@ -2,6 +2,7 @@
 using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,9 @@ using System.Text;
 namespace ECommerce.Presentation.Controllers
 {
 
- 
+
+
+    [Authorize]
     public class ProductsController(IProductServivce servivce) : ApiBaseController
     {
 

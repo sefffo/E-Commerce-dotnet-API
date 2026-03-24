@@ -1,4 +1,3 @@
-using AutoMapper;
 using ECommerce.Domain.Entities.IdentityModule;
 using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.DataSeed;
@@ -12,13 +11,13 @@ using ECommerce.Services.Servicies;
 using ECommerce.Web.CustomMiddleWares;
 using ECommerce.Web.Extensions;
 using ECommerce.Web.Factories;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
-using System.Reflection;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace ECommerce.Web
 {
@@ -30,11 +29,55 @@ namespace ECommerce.Web
 
 
 
+
+            #region Auth
+
+            //that's handle the request to match this headers 
+
+            builder.Services.AddAuthentication(
+
+                options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+                }
+
+
+
+
+
+
+
+
+
+                ).AddJwtBearer(options =>
+
+                {
+                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidIssuer = builder.Configuration["JwtOptions:Issuer"],
+                        ValidAudience = builder.Configuration["JwtOptions:Audience"],
+                        ValidateLifetime=true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtOptions:securityKey"]!))
+                    };
+
+
+
+                }
+                );
+
+
+
+            #endregion
+
             #region Registers
 
 
 
-        
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             builder.Services.AddScoped<IOrderService, OrderService>();
 
@@ -65,7 +108,7 @@ namespace ECommerce.Web
 
             builder.Services.AddDbContext<ApplicationIdentityDbContexts>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
-                  
+
 
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -130,7 +173,7 @@ namespace ECommerce.Web
 
 
 
-            
+
 
 
             builder.Services.AddControllers();
@@ -206,7 +249,7 @@ namespace ECommerce.Web
 
             app.MapStaticAssets();
 
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
 
