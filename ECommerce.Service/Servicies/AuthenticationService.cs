@@ -123,7 +123,10 @@ namespace ECommerce.Services.Servicies
             if (User == null)
                 return Error.NotFound("User Not Found", $"Uer With Email {email} is not Found");
 
-          
+            if (User.Address == null)
+                return Error.NotFound("Address Not Found", "This user has no address set yet");
+
+
 
             else
             {
