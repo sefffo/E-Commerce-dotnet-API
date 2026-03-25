@@ -11,6 +11,7 @@ using ECommerce.Services.Servicies;
 using ECommerce.Web.CustomMiddleWares;
 using ECommerce.Web.Extensions;
 using ECommerce.Web.Factories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Text;
-using Microsoft.AspNetCore.Authentication.Google;
 
 namespace ECommerce.Web
 {
@@ -41,6 +41,10 @@ namespace ECommerce.Web
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    //options.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
+                    //options.DefaultChallengeScheme= GoogleDefaults.AuthenticationScheme;
+                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; // 👈 ADD THIS
+
 
                 }
 
@@ -52,7 +56,9 @@ namespace ECommerce.Web
 
 
 
-                ).AddJwtBearer(options =>
+                ).AddCookie() //for the google login handshake
+                .AddJwtBearer(options =>
+
 
                 {
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -61,7 +67,7 @@ namespace ECommerce.Web
                         ValidateAudience = true,
                         ValidIssuer = builder.Configuration["JwtOptions:Issuer"],
                         ValidAudience = builder.Configuration["JwtOptions:Audience"],
-                        ValidateLifetime=true,
+                        ValidateLifetime = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtOptions:securityKey"]!))
                     };
 
@@ -74,8 +80,9 @@ namespace ECommerce.Web
                     options.ClientSecret = builder.Configuration["GoogleOAuth:ClientSecret"]!;
                     options.CallbackPath = "/signin-google"; // must match Google Console exactly
                     options.SaveTokens = true;
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 });
-            ;
+
 
 
 
