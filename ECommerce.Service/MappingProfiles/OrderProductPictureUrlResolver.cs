@@ -16,21 +16,18 @@ namespace ECommerce.Services.MappingProfiles
             {
                 return string.Empty;
             }
-
-            if (source.Product.PictureUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            var picturePath = source.Product.PictureUrl;
+            if (picturePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                return source.Product.PictureUrl;
+                var uri = new Uri(picturePath);
+                picturePath = uri.PathAndQuery;
             }
-
             var baseurl = configuration.GetSection("URLs")["BaseUrl"];
 
             if (baseurl == null)
                 return string.Empty;
 
-            var picUrl = $"{baseurl}{source.Product.PictureUrl}";
-
-
-            return picUrl;
+            return $"{baseurl.TrimEnd('/')}{picturePath}";
         }
     }
 }

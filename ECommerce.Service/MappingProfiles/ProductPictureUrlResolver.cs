@@ -3,6 +3,7 @@ using ECommerce.Domain.Entities.ProductModule;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,20 +19,18 @@ namespace ECommerce.Services.MappingProfiles
             if(string.IsNullOrEmpty(source.PictureUrl))
                 return string.Empty;
 
-
-            if(source.PictureUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            var picturePath = source.PictureUrl;
+            if (picturePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                return source.PictureUrl;
+                var uri = new Uri(picturePath);
+                picturePath = uri.PathAndQuery;
             }
             var baseurl = configuration.GetSection("URLs")["BaseUrl"];
 
             if(baseurl == null)
                 return string.Empty;
 
-            var picUrl = $"{baseurl}{source.PictureUrl}";
-
-
-            return picUrl;
+            return $"{baseurl.TrimEnd('/')}{picturePath}";
 
         }
     }
