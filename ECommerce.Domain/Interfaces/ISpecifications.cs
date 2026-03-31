@@ -1,32 +1,18 @@
-﻿using ECommerce.Domain.Entities;
 using System;
 using System.Collections.Generic;
-using System.Formats.Tar;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace ECommerce.Domain.Interfaces
 {
-    public interface ISpecifications<TEntity, Tkey> where TEntity : BaseEntity<Tkey>
+    public interface ISpecifications<TEntity, TKey>
     {
-        public ICollection<Expression<Func<TEntity, object>>> IncludeExplressions { get; }
-
-        public Expression<Func<TEntity, bool>> Criteria { get; }
-
-
-        public Expression<Func<TEntity, object>> OrderBy { get; }
-
-        public Expression<Func<TEntity, object>> OrderByDescending { get; }
-
-
-        public int Take { get; }
-
-        public int Skip { get; }    
-
-        public  bool IsPaginationEnabled { get; }
-
-
-
-
+        Expression<Func<TEntity, bool>> Criteria { get; }
+        ICollection<Expression<Func<TEntity, object>>> IncludeExplressions { get; }
+        ICollection<string> IncludeStrings { get; }
+        Expression<Func<TEntity, object>> OrderBy { get; }
+        Expression<Func<TEntity, object>> OrderByDescending { get; }
+        int Take { get; }
+        int Skip { get; }
+        bool IsPaginationEnabled { get; }
     }
 }

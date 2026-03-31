@@ -1,50 +1,36 @@
-﻿using ECommerce.Domain.Entities;
+using ECommerce.Domain.Entities;
 using ECommerce.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Persistence
 {
-    //only used to evaluate the specifications and return the list of entities based on the specifications without the need to check anything in the repository layer
-    //evaluator class is a class that takes the specifications and evaluates them and returns the list of entities based on the specifications
     internal static class SpecificationsEvaluator
     {
         public static IQueryable<TEntiy> CreateQuery<TEntiy, Tkey>
             (IQueryable<TEntiy> EntryPoint, ISpecifications<TEntiy, Tkey> specifications) where TEntiy : BaseEntity<Tkey>
         {
-            var Query = EntryPoint; // byb3tt el context 3la el entry point w el entry point hya el db set bta3t el entity
+            var Query = EntryPoint;
             if (specifications is not null)
             {
-
                 if (specifications.OrderBy is not null)
-                {
                     Query = Query.OrderBy(specifications.OrderBy);
-                }
+
                 if (specifications.OrderByDescending is not null)
-                {
                     Query = Query.OrderByDescending(specifications.OrderByDescending);
-                }
 
                 if (specifications.Criteria is not null)
-                {
                     Query = Query.Where(specifications.Criteria);
-                }
+
                 if (specifications.IsPaginationEnabled)
-                {
                     Query = Query.Skip(specifications.Skip).Take(specifications.Take);
-                }
+
                 if (specifications.IncludeExplressions is not null && specifications.IncludeExplressions.Any())
-                {
-                    //    foreach (var includeExp in specifications.IncludeEcplressions)
-                    //    {
-                    //        Query = Query.Include(includeExp);
-                    //    }
-                    
-                    //acummlate  ============ el hadifo 
                     Query = specifications.IncludeExplressions.Aggregate(Query, (current, include) => current.Include(include));
 
-                    //context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)  ===>  context.Products.Include(p => p.Category).Include(p => p.Supplier)
-                }
-
+                // String-based includes for ThenInclude support (e.g. "Items.Product")
+                if (specifications.IncludeStrings is not null && specifications.IncludeStrings.Any())
+                    foreach (var include in specifications.IncludeStrings)
+                        Query = Query.Include(include);
             }
             return Query;
         }

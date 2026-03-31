@@ -1,4 +1,4 @@
-﻿using ECommerce.Domain.Entities.OrderModule;
+using ECommerce.Domain.Entities.OrderModule;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,7 +10,9 @@ namespace ECommerce.Services.Specifications
         public OrderSpecifications(string Email) : base(o => o.UserEmail == Email)
         {
             AddInclude(o => o.Items);
+            AddInclude("Items.Product"); // ThenInclude via string
             AddInclude(o => o.DeliveryMethod);
+            AddInclude(o => o.ShippingAddress);
 
             OrderByDescindingExpression(o => o.OrderDate);
         }
@@ -18,12 +20,9 @@ namespace ECommerce.Services.Specifications
         public OrderSpecifications(Guid id) : base(o => o.Id == id)
         {
             AddInclude(o => o.Items);
+            AddInclude("Items.Product"); // ThenInclude via string
             AddInclude(o => o.DeliveryMethod);
-
+            AddInclude(o => o.ShippingAddress);
         }
-
-
-
-
     }
 }
