@@ -1,4 +1,4 @@
-﻿using ECommerce.Services.Abstraction;
+using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary.DTO_s.PaymentDTOs;
 using ECommerce.SharedLibirary.Settings;
 using Microsoft.AspNetCore.Authorization;
@@ -6,10 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace ECommerce.Presentation.Controllers;
-
-//[ApiController]
-//[Route("api/[controller]")]
-
 
 public class PaymentController : ApiBaseController
 {
@@ -39,10 +35,10 @@ public class PaymentController : ApiBaseController
 
         var order = orderResult.value;
 
-        // Build CreateInvoiceDTO using your actual OrderToReturnDTO properties
+        // Build invoice DTO from order items
         var dto = new CreateInvoiceDTO
         {
-            CartTotal = order.OrderItems.Sum(i => i.Price * i.Quantity).ToString("F2"),         
+            CartTotal = order.OrderItems.Sum(i => i.Price * i.Quantity).ToString("F2"),
             FirstName = model.FirstName,
             LastName = model.LastName,
             Email = model.Email,
@@ -50,45 +46,45 @@ public class PaymentController : ApiBaseController
             Address = model.Address,
             Items = order.OrderItems.Select(i => new CreateInvoiceItemDTO
             {
-                Name = i.ProductName,                 // ← ProductName from OrderItemDTO
-                Price = i.Price.ToString("F2"),        // ← Price from OrderItemDTO
-                Quantity = i.Quantity.ToString()          // ← Quantity from OrderItemDTO
+                Name = i.ProductName,
+                Price = i.Price.ToString("F2"),
+                Quantity = i.Quantity.ToString()
             }).ToList()
         };
 
-        // Call Fawaterak → returns (paymentUrl, invoiceId)
+        // Call Fawaterak
         var (paymentUrl, invoiceId) = await _fawaterakService.CreateInvoiceAsync(dto);
 
-        // Return payment URL to frontend — they redirect the user there
+        // ✅ Save invoiceId to the Order in DB so the callback can find it later
+        await _orderService.SaveInvoiceIdAsync(model.OrderId, invoiceId);
+
         return Ok(new { paymentUrl, invoiceId });
     }
 
-    // 2️⃣ User's browser lands here after payment (UI feedback only)
+    // 2️⃣ User browser lands here after payment (redirect only — UI feedback)
     [HttpGet("success")]
-    public IActionResult PaymentSuccess([FromQuery] string invoiceId)
+    public IActionResult PaymentSuccess([FromQuery] string? invoiceId)
         => Ok(new { message = "Payment successful! Your order is confirmed.", invoiceId });
 
     [HttpGet("fail")]
-    public IActionResult PaymentFail([FromQuery] string invoiceId)
+    public IActionResult PaymentFail([FromQuery] string? invoiceId)
         => BadRequest(new { message = "Payment failed. Please try again.", invoiceId });
 
     [HttpGet("pending")]
-    public IActionResult PaymentPending([FromQuery] string invoiceId)
+    public IActionResult PaymentPending([FromQuery] string? invoiceId)
         => Ok(new { message = "Payment is being processed.", invoiceId });
 
-    // 3️⃣ Fawaterak's SERVER posts here — this is where DB gets updated
+    // 3️⃣ Fawaterak SERVER posts here — this updates the DB
     [HttpPost("callback")]
     public async Task<IActionResult> PaymentCallback([FromBody] FawaterakCallbackPayload payload)
     {
-        // Security: verify it's really Fawaterak calling
         var providerKey = Request.Headers["provider-key"].ToString();
         if (providerKey != _settings.ProviderKey)
             return Unauthorized();
 
-        if (payload.PaymentStatus == "paid")
+        if (payload.PaymentStatus == "paid" && payload.InvoiceId is not null)
             await _orderService.MarkOrderAsPaidAsync(payload.InvoiceId);
 
-        // Always return 200 fast — Fawaterak retries if you're slow
         return Ok();
     }
 }
