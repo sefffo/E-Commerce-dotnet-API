@@ -14,7 +14,7 @@ namespace ECommerce.Services.Abstraction
         Task<Result<OrderToReturnDTO>> GetOrderById(Guid orderId);
 
         // payment related methods
-        Task<bool> MarkOrderAsPaidAsync(string invoiceId);
         Task<bool> SetOrderInvoiceIdAsync(Guid orderId, string invoiceId);
+        Task<bool> MarkOrderAsPaidAsync(string invoiceId);
     }
 }

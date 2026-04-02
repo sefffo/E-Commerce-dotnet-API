@@ -124,7 +124,6 @@ namespace ECommerce.Services.Servicies
             order.PaymentInvoiceId = invoiceId;
 
             unitOfWork.GetRepository<Order, Guid>().Update(order);
-
             var res = await unitOfWork.SaveChangesAsync();
             return res > 0;
         }
@@ -141,9 +140,7 @@ namespace ECommerce.Services.Servicies
             order.Status = OrderStatus.Paid;
 
             unitOfWork.GetRepository<Order, Guid>().Update(order);
-
             var res = await unitOfWork.SaveChangesAsync();
-
             return res > 0;
         }
     }

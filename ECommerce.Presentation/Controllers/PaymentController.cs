@@ -49,10 +49,8 @@ public class PaymentController : ApiBaseController
             }).ToList()
         };
 
-        // Call Fawaterak
         var (paymentUrl, invoiceId) = await _fawaterakService.CreateInvoiceAsync(dto);
 
-        // Save invoiceId to the order in DB so callback can find it later
         await _orderService.SetOrderInvoiceIdAsync(model.OrderId, invoiceId);
 
         return Ok(new { paymentUrl, invoiceId });
@@ -78,7 +76,7 @@ public class PaymentController : ApiBaseController
             return Unauthorized();
 
         if (payload.PaymentStatus == "paid")
-            await _orderService.MarkOrderAsPaidAsync(payload.InvoiceId);
+            await _orderService.MarkOrderAsPaidAsync(payload.InvoiceId!);
 
         return Ok();
     }
