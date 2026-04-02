@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace ECommerce.Services.Servicies.Payment_Service
 {
@@ -71,7 +71,7 @@ namespace ECommerce.Services.Servicies.Payment_Service
         public string Url { get; set; } = default!;
 
         [JsonPropertyName("invoiceId")]
-        public string InvoiceId { get; set; } = default!;
+        public long InvoiceId { get; set; }
     }
 
     internal class FawaterakInvoiceResponse
