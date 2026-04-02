@@ -1,6 +1,7 @@
-﻿using ECommerce.Services.Abstraction;
+using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary.DTO_s.PaymentDTOs;
 using ECommerce.SharedLibirary.Settings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Text;
@@ -12,10 +13,27 @@ public class FawaterakService : IFawaterakService
 {
     private readonly HttpClient _httpClient;
     private readonly FawaterakSettings _settings;
+    private readonly ILogger<FawaterakService> _logger;
 
-    public FawaterakService(HttpClient httpClient, IOptions<FawaterakSettings> settings)
+    // Use null policy so [JsonPropertyName] attributes are the ONLY source of truth
+    private static readonly JsonSerializerOptions _serializeOptions = new()
+    {
+        PropertyNamingPolicy = null,
+        WriteIndented = false
+    };
+
+    private static readonly JsonSerializerOptions _deserializeOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    public FawaterakService(
+        HttpClient httpClient,
+        IOptions<FawaterakSettings> settings,
+        ILogger<FawaterakService> logger)
     {
         _settings = settings.Value;
+        _logger = logger;
         _httpClient = httpClient;
         _httpClient.BaseAddress = new Uri(_settings.BaseUrl);
         _httpClient.DefaultRequestHeaders.Authorization =
@@ -53,20 +71,21 @@ public class FawaterakService : IFawaterakService
             }
         };
 
-        var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        });
+        var json = JsonSerializer.Serialize(request, _serializeOptions);
+
+        // Log the exact JSON being sent — check this in your console
+        _logger.LogInformation("Fawaterak request payload: {Json}", json);
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var httpResponse = await _httpClient.PostAsync("/api/v2/createInvoiceLink", content);
         var body = await httpResponse.Content.ReadAsStringAsync();
 
-        if (!httpResponse.IsSuccessStatusCode)
-            throw new Exception($"Fawaterak error {httpResponse.StatusCode}: {body}");
+        _logger.LogInformation("Fawaterak response ({Status}): {Body}", httpResponse.StatusCode, body);
 
-        var result = JsonSerializer.Deserialize<FawaterakInvoiceResponse>(body,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (!httpResponse.IsSuccessStatusCode)
+            throw new Exception($"Fawaterak HTTP error {httpResponse.StatusCode}: {body}");
+
+        var result = JsonSerializer.Deserialize<FawaterakInvoiceResponse>(body, _deserializeOptions);
 
         if (result?.Status != "success")
             throw new Exception($"Fawaterak returned non-success: {body}");
