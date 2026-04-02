@@ -1,9 +1,16 @@
-﻿namespace ECommerce.SharedLibirary.DTO_s.PaymentDTOs
+using System.Text.Json.Serialization;
+
+namespace ECommerce.SharedLibirary.DTO_s.PaymentDTOs
 {
     public class FawaterakCallbackPayload
     {
-        public string InvoiceId { get; set; } = default!;
-        public string PaymentStatus { get; set; } = default!; // "paid", "failed", "pending"
-        public decimal Amount { get; set; }
+        [JsonPropertyName("invoice_id")]
+        public string? InvoiceId { get; set; }
+
+        [JsonPropertyName("payment_status")]
+        public string? PaymentStatus { get; set; } // "paid", "failed", "pending"
+
+        [JsonPropertyName("amount")]
+        public decimal? Amount { get; set; }
     }
 }
