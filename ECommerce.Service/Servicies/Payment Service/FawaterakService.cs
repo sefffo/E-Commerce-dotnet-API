@@ -15,7 +15,6 @@ public class FawaterakService : IFawaterakService
     private readonly FawaterakSettings _settings;
     private readonly ILogger<FawaterakService> _logger;
 
-    // Use null policy so [JsonPropertyName] attributes are the ONLY source of truth
     private static readonly JsonSerializerOptions _serializeOptions = new()
     {
         PropertyNamingPolicy = null,
@@ -72,8 +71,6 @@ public class FawaterakService : IFawaterakService
         };
 
         var json = JsonSerializer.Serialize(request, _serializeOptions);
-
-        // Log the exact JSON being sent — check this in your console
         _logger.LogInformation("Fawaterak request payload: {Json}", json);
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -90,6 +87,6 @@ public class FawaterakService : IFawaterakService
         if (result?.Status != "success")
             throw new Exception($"Fawaterak returned non-success: {body}");
 
-        return (result.Data.Url, result.Data.InvoiceId);
+        return (result.Data.Url, result.Data.InvoiceId.ToString());
     }
 }
