@@ -24,8 +24,8 @@ namespace ECommerce.Persistence
                 if (specifications.IsPaginationEnabled)
                     Query = Query.Skip(specifications.Skip).Take(specifications.Take);
 
-                if (specifications.IncludeExplressions is not null && specifications.IncludeExplressions.Any())
-                    Query = specifications.IncludeExplressions.Aggregate(Query, (current, include) => current.Include(include));
+                if (specifications.IncludeExpressions is not null && specifications.IncludeExpressions.Any())
+                    Query = specifications.IncludeExpressions.Aggregate(Query, (current, include) => current.Include(include));
 
                 // String-based includes for ThenInclude support (e.g. "Items.Product")
                 if (specifications.IncludeStrings is not null && specifications.IncludeStrings.Any())

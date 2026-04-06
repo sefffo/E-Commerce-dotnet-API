@@ -41,14 +41,14 @@ namespace ECommerce.Services.Specifications
             OrderByDescending = orderByDescendingExpression;
         }
 
-        public ICollection<Expression<Func<TEntiy, object>>> IncludeExplressions { get; } = [];
+        public ICollection<Expression<Func<TEntiy, object>>> IncludeExpressions { get; } = [];
 
         // String-based includes for ThenInclude support
         public ICollection<string> IncludeStrings { get; } = [];
 
         protected void AddInclude(Expression<Func<TEntiy, object>> includeExpression)
         {
-            IncludeExplressions.Add(includeExpression);
+            IncludeExpressions.Add(includeExpression);
         }
 
         protected void AddInclude(string includeString)
