@@ -13,7 +13,7 @@ using System.Text;
 
 namespace ECommerce.Services.Services
 {
-    public class ProductService(IUnitOfWork unitOfWork, IMapper mapper) : IProductService
+    public class ProductService(IUnitOfWork unitOfWork, IMapper mapper , HttpClient httpClient) : IProductService
     {
         public async Task<Result<BrandDto>> CreateBrandAsync(CreateBrandDto dto)
         {
@@ -71,11 +71,11 @@ namespace ECommerce.Services.Services
             var brandRepo = unitOfWork.GetRepository<ProductBrand, int>();
             var typeRepo = unitOfWork.GetRepository<ProductType, int>();
 
+            //var imageUrl = await httpClient.GetAsync("/api/upload");
 
 
 
 
-    
 
             var existingProduct = await repo.GetByIdAsync(new ProductByNameSpecification(createProductDto.Name));
             if (existingProduct != null)

@@ -1,12 +1,12 @@
 ﻿using ECommerce.Presentation.Attributes;
 using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary;
+using ECommerce.SharedLibirary.CommonResult;
 using ECommerce.SharedLibirary.DTO_s.ProductDtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 
 
@@ -39,7 +39,7 @@ namespace ECommerce.Presentation.Controllers
         {
             var product = await service.GetProductByIdAsync(id);
 
-            return HandleResult<ProductDto>(product) ;
+            return HandleResult<ProductDto>(product);
 
         }
 
@@ -63,6 +63,47 @@ namespace ECommerce.Presentation.Controllers
             return Ok(types);
 
         }
+
+
+        [HttpPost("/CreateBrand")]
+        [Authorize (Roles = "Admin")]
+        public async Task<IActionResult> CreateBrandAsync([FromBody] CreateBrandDto createBrandDto)
+        {
+            var createdBrand = await service.CreateBrandAsync(createBrandDto);
+            if(!createdBrand.isSuccess)
+            {
+                return BadRequest(createdBrand.Errors);
+            }
+            return StatusCode(StatusCodes.Status201Created, createdBrand.value);
+        }
+
+
+        [HttpPost("/CreateType")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateTypeAsync([FromBody] CreateTypeDto createTypeDto)
+        {
+            var createdType = await service.CreateTypeAsync(createTypeDto);
+            if (!createdType.isSuccess)
+            {
+                return BadRequest(createdType.Errors);
+            }
+            return StatusCode(StatusCodes.Status201Created, createdType.value);
+        }
+
+
+        [HttpPost]
+        [Authorize (Roles = "Admin")]
+        public async Task<IActionResult> CreateProductAsync([FromBody] CreateProductDto createProductDto)
+        { 
+            
+            Result<ProductDto>? createdProduct = await service.CreateProductAsync(createProductDto);
+
+            if(!createdProduct.isSuccess)
+            {
+                return BadRequest(createdProduct.Errors);
+            }
+
+            return StatusCode(StatusCodes.Status201Created, createdProduct.value);
+        }
     }
 }
- 
