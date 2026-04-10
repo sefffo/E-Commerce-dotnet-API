@@ -9,7 +9,7 @@ namespace ECommerce.Presentation.Controllers
     {
         
 
-        [HttpPost("upload")]
+        [HttpPost]
         public async Task<IActionResult> UploadFile([FromForm]UploadImageDto uploadImageDto)
         {
             // 1. Check DTO + file

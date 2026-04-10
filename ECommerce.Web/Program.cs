@@ -95,6 +95,14 @@ namespace ECommerce.Web
             #region Registers
 
 
+
+            //upload Service Registeration
+           builder.Services.AddScoped<IUploadService, UploadService>();
+
+
+
+
+
             // Bind FawaterakSettings
             builder.Services.Configure<FawaterakSettings>(
                 builder.Configuration.GetSection("FawaterakSettings"));

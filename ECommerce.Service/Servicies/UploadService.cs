@@ -24,6 +24,10 @@ namespace ECommerce.Services.Servicies
             // ToLowerInvariant() → culture-safe lowercase (safer than ToLower())
             var extension = Path.GetExtension(fileName).ToLowerInvariant();
 
+
+            if (imageStream.Length > 10 * 1024 * 1024) // 10MB max
+                throw new InvalidOperationException("File size cannot exceed 10MB.");
+
             // HashSet.Contains() is O(1) — instant lookup
             if (!_allowedExtensions.Contains(extension))
                 throw new InvalidOperationException(
