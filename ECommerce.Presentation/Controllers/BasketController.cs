@@ -26,7 +26,7 @@ namespace ECommerce.Presentation.Controllers
           
             var basketId = GetBasketId();
 
-            if (basketId is null) return Unauthorized();
+           
 
             var basket = await basketService.GetBasketAsync(basketId);
 
@@ -39,7 +39,7 @@ namespace ECommerce.Presentation.Controllers
         {
             var basketId = GetBasketId();
 
-            if (basketId is null) return Unauthorized();
+           
 
 
             basket = basket with { id = basketId }; // to ensure the basket ID is tied to the user and not overridden by client input
@@ -54,7 +54,7 @@ namespace ECommerce.Presentation.Controllers
         {
             var basketId = GetBasketId();
 
-            if (basketId is null) return Unauthorized();
+            
 
             var result = await basketService.DeleteBasketAsync(basketId);
             return Ok(result);
@@ -66,7 +66,6 @@ namespace ECommerce.Presentation.Controllers
         {
 
             var basketIdFromUser = GetBasketId();
-            if (basketIdFromUser is null) return Unauthorized();
             var basket = await basketService.AddItemAsync(basketIdFromUser, item);
             return Ok(basket);
         }
@@ -77,9 +76,8 @@ namespace ECommerce.Presentation.Controllers
             int itemId, [FromQuery] int quantity)
         {
 
-            var basketIdfromUser = GetBasketId();
-            if (basketIdfromUser is null) return Unauthorized();
-            var basket = await basketService.UpdateItemQuantityAsync(basketIdfromUser, itemId, quantity);
+            var basketIdFromUser = GetBasketId();
+            var basket = await basketService.UpdateItemQuantityAsync(basketIdFromUser, itemId, quantity);
             return Ok(basket);
         }
 
@@ -88,7 +86,6 @@ namespace ECommerce.Presentation.Controllers
         public async Task<ActionResult<BasketDTO>> RemoveItem(int itemId)
         {
             var basketIdFromUser = GetBasketId();
-            if (basketIdFromUser is null) return Unauthorized();
             var basket = await basketService.RemoveItemAsync(basketIdFromUser, itemId);
             return Ok(basket);
         }
