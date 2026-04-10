@@ -18,7 +18,7 @@ namespace ECommerce.Presentation.Controllers
         {
             var result = await authenticationService.AssignRoleAsync(assignRoleDTO);
             if (result.isSuccess)
-                return Ok();
+                return Ok($"Role {assignRoleDTO.RoleName} assigned to user {assignRoleDTO.UserEmail}");
             return HandleResult(result);
         }
 
