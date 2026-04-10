@@ -9,14 +9,14 @@ using System.Text;
 
 namespace ECommerce.Persistence.IdentityData.DataSeeding
 {
-    public class IdentityDataInitializer(UserManager<AppUser> userManager , RoleManager<IdentityRole> roleManager , ILogger<IdentityDataInitializer> logger) : IDataInitializer
+    public class IdentityDataInitializer(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<IdentityDataInitializer> logger) : IDataInitializer
     {
         public async Task Initialize()
         {
             try
             {
 
-                if(!roleManager.Roles.Any())
+                if (!roleManager.Roles.Any())
                 {
                     await roleManager.CreateAsync(new IdentityRole("Admin"));
                     await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
@@ -42,16 +42,27 @@ namespace ECommerce.Persistence.IdentityData.DataSeeding
                         PhoneNumber = "01000000001"
 
                     };
+                    var user3 = new AppUser
+                    {
+                        UserName = "saif.Dev",
+                        Email = "superadmin@ecommerce.com",
+                        DisplayName = "Saif Lotfy",
+                        PhoneNumber = "01000000001"
+                    };
 
                     await userManager.CreateAsync(user, "Pa$$w0rd");
                     await userManager.CreateAsync(user2, "Pa$$w0rd");
 
                     await userManager.AddToRoleAsync(user, "SuperAdmin");
                     await userManager.AddToRoleAsync(user2, "Admin");
+
+                    await userManager.CreateAsync(user3, "SuperAdmin@123");
+                    await userManager.AddToRoleAsync(user3, "SuperAdmin");
+
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, $"An error occurred while seeding identity data. \n Message : {ex.Message}");
             }
