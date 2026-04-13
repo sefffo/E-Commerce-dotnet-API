@@ -1,0 +1,34 @@
+# Git history — no reason to send version control data into the build
+**/.git
+**/.gitignore
+**/.gitattributes
+
+# Visual Studio IDE folders and user settings
+**/.vs
+**/*.user
+**/*.suo
+
+# Compiled output — Docker builds fresh inside the container
+# These Windows-compiled binaries would break the Linux build
+# and the obj/ folders contain NuGet cache with Windows paths (C:\Program Files...)
+# which cause the ResolvePackageAssets error
+**/bin
+**/obj
+
+# Docker files themselves — no need to copy these into the image
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation and design assets — not needed to run the app
+**/*.png
+**/*.pdf
+**/*.md
+**/*.excalidraw
+
+# Environment file — never copy secrets into the image
+.env
+.env.*
+
+# GitHub Actions workflows — not needed inside the container
+**/.github
