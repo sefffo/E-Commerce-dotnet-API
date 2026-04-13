@@ -19,7 +19,7 @@ COPY ECommerceSolution.slnx .
 COPY ECommerce.Web/ECommerce.Web.csproj                                    ECommerce.Web/
 COPY ECommerce.Domain/ECommerce.Domain.csproj                              ECommerce.Domain/
 COPY ECommerce.Persistence/ECommerce.Persistence.csproj                    ECommerce.Persistence/
-COPY ECommerce.Service/ECommerce.Service.csproj                            ECommerce.Service/
+COPY ECommerce.Services/ECommerce.Services.csproj                            ECommerce.Services/
 COPY ECommerce.Services.Abstraction/ECommerce.Services.Abstraction.csproj  ECommerce.Services.Abstraction/
 COPY ECommerce.SharedLibirary/ECommerce.SharedLibirary.csproj              ECommerce.SharedLibirary/
 COPY ECommerce.Presentation/ECommerce.Presentation.csproj                  ECommerce.Presentation/
