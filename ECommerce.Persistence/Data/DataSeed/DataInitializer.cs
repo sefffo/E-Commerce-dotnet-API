@@ -56,18 +56,14 @@ namespace ECommerce.Persistence.Data.DataSeed
 
         private async Task SeedDataFromJson<TEntity, Tkey>(string fileName, DbSet<TEntity> dbset) where TEntity : BaseEntity<Tkey>
         {
-            //S:\Road to full stack\BackEnd\Studying\Rev on API\EComm Aliaa tarek\ECommerceSolution\ECommerce.Persistence\Data\DataSeed\JSONFiles\
-            //var filePath = @"..\ECommerce.Persistence\Data\DataSeed\JSONFiles\" + fileName;
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "DataSeed", fileName);
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "DataSeed", "JSONFiles", fileName);
 
             if (!File.Exists(filePath)) throw new FileNotFoundException($"File {fileName} is not Found");
 
             try
             {
-                //var data = File.ReadAllText(filePath); ==> bad practise for large files
-
                 using var stream = File.OpenRead(filePath);
-                var data = await JsonSerializer.DeserializeAsync<List<TEntity>>(stream, new JsonSerializerOptions() //3shan lw el data feha capital or small letters w 3shan lw feha camelCase aw pascalCase
+                var data = await JsonSerializer.DeserializeAsync<List<TEntity>>(stream, new JsonSerializerOptions()
                 { PropertyNameCaseInsensitive = true });
 
                 if (data == null) return;
@@ -80,7 +76,6 @@ namespace ECommerce.Persistence.Data.DataSeed
                 throw new Exception($"An error occurred while seeding data from {fileName}. , {ex}");
 
             }
-
 
         }
     }

@@ -17,7 +17,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<Content Include="Data\DataSeed\*.json">
+		<Content Include="Data\DataSeed\JSONFiles\*.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
