@@ -23,5 +23,8 @@
     <Project Path="ECommerce.Presentation/ECommerce.Presentation.csproj" />
     <Project Path="ECommerce.Web/ECommerce.Web.csproj" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".env" />
+  </Folder>
   <Project Path="ECommerce.SharedLibirary/ECommerce.SharedLibirary.csproj" />
 </Solution>
