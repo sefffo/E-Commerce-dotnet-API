@@ -1,7 +1,6 @@
-﻿using ECommerce.Domain.Interfaces;
+using ECommerce.Domain.Interfaces;
 using ECommerce.Persistence.Data.DbContexts;
 using ECommerce.Persistence.Data.IdentityData;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -45,24 +44,13 @@ namespace ECommerce.Web.Extensions
             await dataInitializer.Initialize();
             return app;
         }
+
         public static async Task<WebApplication> SeedIdentityDataAsync(this WebApplication app)
         {
             await using var scope = app.Services.CreateAsyncScope();
             var dataInitializer = scope.ServiceProvider.GetRequiredKeyedService<IDataInitializer>("Identity"); //to create initial data and auto migrations 
             await dataInitializer.Initialize();
             return app;
-        }
-        public static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
-        {
-            string[] roles = ["User", "Admin"];
-
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
         }
     }
 }
