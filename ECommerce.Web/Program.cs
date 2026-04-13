@@ -45,17 +45,10 @@ namespace ECommerce.Web
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    //options.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
-                    //options.DefaultChallengeScheme= GoogleDefaults.AuthenticationScheme;
-                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; // 
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; 
                     
 
                 }
-
-
-
-
-
 
 
 
@@ -102,7 +95,6 @@ namespace ECommerce.Web
 
 
 
-
             // Bind FawaterakSettings
             builder.Services.Configure<FawaterakSettings>(
                 builder.Configuration.GetSection("FawaterakSettings"));
@@ -115,27 +107,14 @@ namespace ECommerce.Web
 
             builder.Services.AddScoped<IOrderService, OrderService>();
 
-            //builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            //builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-
             builder.Services.AddIdentityCore<AppUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             })
             .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationIdentityDbContexts>();
-            //this is the correct way to register identity core services with roles and entity framework stores, 
-            //it allows us to use the identity services without the need for the full identity UI and cookie authentication, which is not needed in an API project
-
-
-
-            //builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<ApplicationIdentityDbContexts>();
-
-
-
-
-
+            .AddEntityFrameworkStores<ApplicationIdentityDbContexts>()
+            .AddSignInManager()           // required for external login (Google OAuth) to complete the handshake
+            .AddDefaultTokenProviders();  // required for email confirmation / password reset tokens
 
 
 
@@ -189,8 +168,6 @@ namespace ECommerce.Web
 
 
 
-
-
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             builder.Services.AddKeyedScoped<IDataInitializer, DataInitializer>("Default");
@@ -207,9 +184,6 @@ namespace ECommerce.Web
 
 
 
-
-
-
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             //builder.Services.AddOpenApi();
@@ -219,36 +193,7 @@ namespace ECommerce.Web
             var app = builder.Build();
 
 
-            //Not the Best Practice
-
-            //app.Use(async (context, next) =>
-            //{
-            //    try
-            //    {
-            //        await next.Invoke(context);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Console.WriteLine(ex.Message);
-            //        //return custom exceptions
-            //        // Hedar change 
-
-            //        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
-
-            //        await context.Response.WriteAsJsonAsync(new
-            //        {
-            //            StatusCode = StatusCodes.Status500InternalServerError, //as a general one first 
-            //            Error = ex.Message
-            //        });
-            //    }
-            //});
-
             app.UseMiddleware<ExceptionHandlerMiddleWare>();
-
-
-            // Configure the HTTP request pipeline.
- 
 
 
 
@@ -267,10 +212,6 @@ namespace ECommerce.Web
 
             await app.SeedDataAsync();
 
-            var roleManager = app.Services.GetRequiredService<RoleManager<IdentityRole>>();
-
-
-
             #endregion
 
 
@@ -281,7 +222,6 @@ namespace ECommerce.Web
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                //app.MapOpenApi();
             }
 
 
