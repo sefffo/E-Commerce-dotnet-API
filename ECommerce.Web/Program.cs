@@ -267,6 +267,8 @@ namespace ECommerce.Web
 
             await app.SeedDataAsync();
 
+            var roleManager = app.Services.GetRequiredService<RoleManager<IdentityRole>>();
+
 
 
             #endregion
