@@ -15,7 +15,6 @@ using ECommerce.Web.CustomMiddleWares;
 using ECommerce.Web.Extensions;
 using ECommerce.Web.Factories;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -45,8 +44,8 @@ namespace ECommerce.Web
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; 
-                    
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
 
                 }
 
@@ -90,7 +89,7 @@ namespace ECommerce.Web
 
 
             //upload Service Registeration
-           builder.Services.AddScoped<IUploadService, UploadService>();
+            builder.Services.AddScoped<IUploadService, UploadService>();
 
 
 
@@ -218,11 +217,10 @@ namespace ECommerce.Web
 
             app.UseHttpsRedirection();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
 
 
             app.MapStaticAssets();
