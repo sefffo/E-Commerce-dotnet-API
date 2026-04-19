@@ -65,7 +65,7 @@
 
         public static Error InvalidCredentials(string code, string description)
         {
-            return new Error(code, description, ErrorType.InvalidCredentials);
+            return new Error(code, description, ErrorType.InvalidCredentials);  
         }
         public static Error Failure(string code = "General.Failure", string description = "A General Failure Occurred ")
         {

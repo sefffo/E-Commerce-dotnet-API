@@ -59,7 +59,7 @@ namespace ECommerce.Web.CustomMiddleWares
                 };
                 httpContext.Response.StatusCode = problem.Status.Value;
 
-                httpContext.Response.ContentType = "application/json"; // ✅ Add this
+                httpContext.Response.ContentType = "application/json"; 
 
                 await httpContext.Response.WriteAsJsonAsync(problem);
 
