@@ -129,6 +129,7 @@ namespace ECommerce.Presentation.Controllers
 
 
         [Authorize(Roles = "SuperAdmin")]
+        [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsersAsync()
         {
             return HandleResult(await authenticationService.GetAllUsersAsync());
