@@ -103,6 +103,16 @@ namespace ECommerce.Services.Servicies
             return Result<IEnumerable<OrderToReturnDTO>>.Ok(mapper.Map<IEnumerable<OrderToReturnDTO>>(orders));
         }
 
+        public async Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersForAdminAsync()
+        {
+            var orders = await unitOfWork.GetRepository<Order, Guid>().GetAllAsync();
+
+            if (!orders.Any())
+                return Error.NotFound("No orders found", "There are no orders in the system");
+
+            return Result<IEnumerable<OrderToReturnDTO>>.Ok(mapper.Map<IEnumerable<OrderToReturnDTO>>(orders));
+        }
+
         public async Task<Result<OrderToReturnDTO>> GetOrderById(Guid orderId)
         {
             var spec = new OrderSpecifications(orderId);
@@ -114,16 +124,15 @@ namespace ECommerce.Services.Servicies
             return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
         }
 
-        public async Task<bool> SetOrderInvoiceIdAsync(Guid orderId, string invoiceId)
+        public async Task<bool> SaveInvoiceIdAsync(Guid orderId, string invoiceId)
         {
             var spec = new OrderSpecifications(orderId);
             var order = await unitOfWork.GetRepository<Order, Guid>().GetByIdAsync(spec);
-
             if (order is null) return false;
 
             order.PaymentInvoiceId = invoiceId;
-
             unitOfWork.GetRepository<Order, Guid>().Update(order);
+
             var res = await unitOfWork.SaveChangesAsync();
             return res > 0;
         }
@@ -134,12 +143,11 @@ namespace ECommerce.Services.Servicies
             var order = orders.FirstOrDefault(o => o.PaymentInvoiceId == invoiceId);
 
             if (order is null) return false;
-
             if (order.Status == OrderStatus.Paid) return true;
 
             order.Status = OrderStatus.Paid;
-
             unitOfWork.GetRepository<Order, Guid>().Update(order);
+
             var res = await unitOfWork.SaveChangesAsync();
             return res > 0;
         }

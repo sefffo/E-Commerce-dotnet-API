@@ -8,13 +8,14 @@ namespace ECommerce.Services.Abstraction
 {
     public interface IOrderService
     {
-        public Task<Result<OrderToReturnDTO>> CreateOrderAsync(OrderDTO orderDTO, string Email);
+        Task<Result<OrderToReturnDTO>> CreateOrderAsync(OrderDTO orderDTO, string Email);
         Task<Result<IEnumerable<DeliveryMethodDTO>>> GetDeliveryMethodsAsync();
         Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersAsync(string email);
+        Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersForAdminAsync();
         Task<Result<OrderToReturnDTO>> GetOrderById(Guid orderId);
 
-        // payment related methods
-        Task<bool> SetOrderInvoiceIdAsync(Guid orderId, string invoiceId);
+        // payment related
+        Task<bool> SaveInvoiceIdAsync(Guid orderId, string invoiceId);
         Task<bool> MarkOrderAsPaidAsync(string invoiceId);
     }
 }

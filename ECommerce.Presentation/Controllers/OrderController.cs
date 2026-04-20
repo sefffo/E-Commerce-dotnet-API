@@ -9,6 +9,7 @@ using System.Security.Claims;
 namespace ECommerce.Presentation.Controllers
 {
     [Authorize]
+    [Route("api/[controller]")]
     public class OrderController(IOrderService orderService) : ApiBaseController
     {
         [HttpPost]
@@ -17,7 +18,6 @@ namespace ECommerce.Presentation.Controllers
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await orderService.CreateOrderAsync(orderDto, email);
 
-            // Invalidate AllOrders cache for this user so next GET returns fresh data
             if (result.isSuccess)
             {
                 var cacheService = HttpContext.RequestServices.GetRequiredService<ICacheService>();
@@ -29,6 +29,7 @@ namespace ECommerce.Presentation.Controllers
         }
 
         [HttpGet("DeliveryMethods")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<DeliveryMethodDTO>>> GetDeliveryMethods()
         {
             var result = await orderService.GetDeliveryMethodsAsync();
@@ -41,6 +42,18 @@ namespace ECommerce.Presentation.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await orderService.GetAllOrdersAsync(email);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Returns ALL orders in the system. Restricted to Admin and SuperAdmin roles only.
+        /// </summary>
+        [HttpGet("Admin/AllOrders")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        [RedisCache(60)]
+        public async Task<ActionResult<IEnumerable<OrderToReturnDTO>>> GetAllOrdersForAdmin()
+        {
+            var result = await orderService.GetAllOrdersForAdminAsync();
             return HandleResult(result);
         }
 
