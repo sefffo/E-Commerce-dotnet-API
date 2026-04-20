@@ -36,6 +36,24 @@ namespace ECommerce.Web
 
             #region Auth
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("DashboardPolicy", policy =>
+                {
+                    policy
+                        .WithOrigins(
+                            "http://localhost:5173",   // Vite dev server
+                            "http://localhost:3000",   // fallback
+                            "https://your-deployed-dashboard-url.com" // add when you deploy the dashboard
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
+
+
             //that's handle the request to match this headers 
 
             builder.Services.AddAuthentication(
@@ -203,7 +221,7 @@ namespace ECommerce.Web
 
             app.UseMiddleware<ExceptionHandlerMiddleWare>();
 
-
+            app.UseCors("DashboardPolicy");
 
             #region Data Seeding
 
