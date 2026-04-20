@@ -1,7 +1,8 @@
-﻿using ECommerce.SharedLibirary.CommonResult;
+using ECommerce.SharedLibirary.CommonResult;
 using ECommerce.SharedLibirary.DTO_s.IdentityDTOs;
 using ECommerce.SharedLibirary.DTO_s.OrderDTOs;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,17 @@ namespace ECommerce.Presentation.Controllers
 {
     public class AuthenticationController(Services.Abstraction.IAuthenticationService authenticationService) : ApiBaseController
     {
+
+        [HttpPost("assign-role")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult> AssignRole(AssignRoleDTO assignRoleDTO)
+        {
+            var result = await authenticationService.AssignRoleAsync(assignRoleDTO);
+            if (result.isSuccess)
+                return Ok($"Role {assignRoleDTO.RoleName} assigned to user {assignRoleDTO.UserEmail}");
+            return HandleResult(result);
+        }
+
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
@@ -25,16 +37,12 @@ namespace ECommerce.Presentation.Controllers
             return HandleResult(result);
         }
 
-
         [HttpGet("check-email")]
         public async Task<ActionResult<bool>> CheckEmail([FromQuery] string email)
         {
             var exists = await authenticationService.CheckEmailAsync(email);
             return Ok(exists);
         }
-
-
-
 
         [HttpGet("CurrentUser")]
         [Authorize]
@@ -45,7 +53,6 @@ namespace ECommerce.Presentation.Controllers
 
             return HandleResult(await authenticationService.GetCurrentUserAsync(email!, token!));
         }
-
 
         [HttpGet("address")]
         [Authorize]
@@ -63,7 +70,6 @@ namespace ECommerce.Presentation.Controllers
             return HandleResult(await authenticationService.UpdateUserAddressAsync(email!, addressDto));
         }
 
-
         [HttpPost("refresh-token")]
         // No [Authorize] here — access token is expired at this point
         public async Task<ActionResult<UserDTO>> RefreshToken(RefreshTokenDTO refreshTokenDTO)
@@ -72,13 +78,15 @@ namespace ECommerce.Presentation.Controllers
             return HandleResult(result);
         }
 
+        // GET api/Authentication/users — SuperAdmin only
+        [HttpGet("users")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsersAsync()
+        {
+            return HandleResult(await authenticationService.GetAllUsersAsync());
+        }
 
-
-
-
-
-
-        //Google OAuth 
+        //Google OAuth
 
         [HttpGet("google-login")]
         public IActionResult GoogleLogin()
@@ -91,7 +99,7 @@ namespace ECommerce.Presentation.Controllers
         [HttpGet("google-callback")]
         public async Task<ActionResult<UserDTO>> GoogleCallback()
         {
-            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Google authentication failed" });
@@ -103,6 +111,5 @@ namespace ECommerce.Presentation.Controllers
             var response = await authenticationService.HandleGoogleLoginAsync(email, name, googleId);
             return HandleResult(response);
         }
-
     }
 }
