@@ -119,7 +119,12 @@ namespace ECommerce.Web
 
 
             builder.Services.AddDbContext<ApplicationIdentityDbContexts>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("IdentityConnection"),
+                    sqlOptions => sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null)));
 
 
             builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -151,7 +156,6 @@ namespace ECommerce.Web
             builder.Services.AddScoped<IProductService, ProductService>();
 
 
-
             //builder.Services.AddAutoMapper(x=>x.LicenseKey="",typeof(ProductPictureUrlResolver).Assembly);//registering the assembly where the resolver is located
             builder.Services.AddAutoMapper(typeof(ProductPictureUrlResolver).Assembly);
             builder.Services.AddTransient<ProductPictureUrlResolver>();
@@ -174,7 +178,12 @@ namespace ECommerce.Web
 
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection"),
+                    sqlOptions => sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null)));
 
 
             #endregion
