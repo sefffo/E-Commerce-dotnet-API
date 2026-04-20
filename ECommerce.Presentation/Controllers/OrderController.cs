@@ -9,6 +9,7 @@ using System.Security.Claims;
 namespace ECommerce.Presentation.Controllers
 {
     [Authorize]
+    [Route("api/[controller]")]
     public class OrderController(IOrderService orderService) : ApiBaseController
     {
         [HttpPost]
