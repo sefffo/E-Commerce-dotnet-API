@@ -270,6 +270,14 @@ namespace ECommerce.Services.Servicies
             if (!RoleExists)
                 return Error.NotFound("Role Not Found", $"Role With Name {assignRoleDTO.RoleName} is not Found");
 
+            var isAlreadyInRole = await userManager.IsInRoleAsync(User, assignRoleDTO.RoleName);
+            if (isAlreadyInRole)
+                return Result<string>.Ok($"User already has role {assignRoleDTO.RoleName}");
+
+            // optionally remove old roles first:
+            var currentRoles = await userManager.GetRolesAsync(User);
+            await userManager.RemoveFromRolesAsync(User, currentRoles);
+
             var result = await userManager.AddToRoleAsync(User, assignRoleDTO.RoleName);
 
             if (!result.Succeeded)
