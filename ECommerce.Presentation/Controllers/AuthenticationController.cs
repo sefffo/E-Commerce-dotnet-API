@@ -12,6 +12,7 @@ namespace ECommerce.Presentation.Controllers
 {
     public class AuthenticationController(Services.Abstraction.IAuthenticationService authenticationService) : ApiBaseController
     {
+
         [HttpPost("assign-role")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<ActionResult> AssignRole(AssignRoleDTO assignRoleDTO)
@@ -49,6 +50,7 @@ namespace ECommerce.Presentation.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var token = await HttpContext.GetTokenAsync("access_token");
+
             return HandleResult(await authenticationService.GetCurrentUserAsync(email!, token!));
         }
 
@@ -69,15 +71,15 @@ namespace ECommerce.Presentation.Controllers
         }
 
         [HttpPost("refresh-token")]
+        // No [Authorize] here — access token is expired at this point
         public async Task<ActionResult<UserDTO>> RefreshToken(RefreshTokenDTO refreshTokenDTO)
         {
             var result = await authenticationService.RefreshTokenAsync(refreshTokenDTO);
             return HandleResult(result);
         }
 
-        // GET api/Authentication/users — SuperAdmin only
-        [HttpGet("users")]
         [Authorize(Roles = "SuperAdmin")]
+        [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsersAsync()
         {
             return HandleResult(await authenticationService.GetAllUsersAsync());
@@ -101,7 +103,8 @@ namespace ECommerce.Presentation.Controllers
             return HandleResult(result);
         }
 
-        // Google OAuth
+        //Google OAuth 
+
         [HttpGet("google-login")]
         public IActionResult GoogleLogin()
         {
@@ -113,6 +116,10 @@ namespace ECommerce.Presentation.Controllers
         [HttpGet("google-callback")]
         public async Task<ActionResult<UserDTO>> GoogleCallback()
         {
+            // Authenticate against the Cookie scheme — this is where Google deposits
+            // the external identity after the OAuth handshake completes.
+            // Using GoogleDefaults.AuthenticationScheme here would re-trigger the
+            // redirect instead of reading the already-completed result.
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             if (!result.Succeeded)
