@@ -12,7 +12,6 @@ namespace ECommerce.Presentation.Controllers
 {
     public class AuthenticationController(Services.Abstraction.IAuthenticationService authenticationService) : ApiBaseController
     {
-
         [HttpPost("assign-role")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<ActionResult> AssignRole(AssignRoleDTO assignRoleDTO)
@@ -50,7 +49,6 @@ namespace ECommerce.Presentation.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var token = await HttpContext.GetTokenAsync("access_token");
-
             return HandleResult(await authenticationService.GetCurrentUserAsync(email!, token!));
         }
 
@@ -71,7 +69,6 @@ namespace ECommerce.Presentation.Controllers
         }
 
         [HttpPost("refresh-token")]
-        // No [Authorize] here — access token is expired at this point
         public async Task<ActionResult<UserDTO>> RefreshToken(RefreshTokenDTO refreshTokenDTO)
         {
             var result = await authenticationService.RefreshTokenAsync(refreshTokenDTO);
@@ -86,8 +83,25 @@ namespace ECommerce.Presentation.Controllers
             return HandleResult(await authenticationService.GetAllUsersAsync());
         }
 
-        //Google OAuth
+        // DELETE api/Authentication/users/{email} — SuperAdmin only
+        [HttpDelete("users/{email}")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult<string>> DeleteUserAsync(string email)
+        {
+            var result = await authenticationService.DeleteUserAsync(email);
+            return HandleResult(result);
+        }
 
+        // POST api/Authentication/users/{email}/revoke-token — SuperAdmin only
+        [HttpPost("users/{email}/revoke-token")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult<string>> RevokeRefreshTokenAsync(string email)
+        {
+            var result = await authenticationService.RevokeRefreshTokenAsync(email);
+            return HandleResult(result);
+        }
+
+        // Google OAuth
         [HttpGet("google-login")]
         public IActionResult GoogleLogin()
         {

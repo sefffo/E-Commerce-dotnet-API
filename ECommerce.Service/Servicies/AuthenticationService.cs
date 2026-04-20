@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ECommerce.Domain.Entities.IdentityModule;
 using ECommerce.Services.Abstraction;
 using ECommerce.SharedLibirary.CommonResult;
@@ -14,49 +14,31 @@ using System.Text;
 
 namespace ECommerce.Services.Servicies
 {
-    public class AuthenticationService(UserManager<AppUser> userManager, IConfiguration configuration, IMapper mapper) : IAuthenticationService
+    public class AuthenticationService(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, IMapper mapper) : IAuthenticationService
     {
-
-
-
         private string GenerateRefreshToken()
         {
-            // generates a cryptographically secure random 32-byte string
-            // this is NOT a JWT — it's just a random opaque string stored in DB
             var randomBytes = new byte[32];
             using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
             return Convert.ToBase64String(randomBytes);
         }
 
-
-
         public async Task<bool> CheckEmailAsync(string Email)
         {
             var email = await userManager.FindByEmailAsync(Email);
-
-            if (email == null)
-            {
-                return false;
-            }
-            else
-                return true;
+            return email != null;
         }
 
-        //Generate te Token for the user ==> change teh behavior of our To See this Throw the header of the class and see the constructor
         public async Task<Result<UserDTO>> GetCurrentUserAsync(string email, string Token)
         {
             var User = await userManager.FindByEmailAsync(email);
             if (User == null)
-            {
                 return Error.NotFound("User Not Found", $"User With Email {email} is not Found");
-            }
-
 
             var userDto = new UserDTO(email, User.DisplayName, Token, RefreshToken: User.RefreshToken!);
             return Result<UserDTO>.Ok(userDto);
         }
-
 
         public async Task<Result<AddressDTO>> UpdateUserAddressAsync(string email, AddressDTO NewAddress)
         {
@@ -67,10 +49,7 @@ namespace ECommerce.Services.Servicies
             if (user == null)
                 return Error.NotFound("User Not Found", $"User with email {email} is not found");
 
-            // Map AddressDTO → Address entity
             var addressEntity = mapper.Map<Address>(NewAddress);
-
-            // Whether the user already has an address or not, just assign it
             user.Address = addressEntity;
 
             var result = await userManager.UpdateAsync(user);
@@ -84,78 +63,56 @@ namespace ECommerce.Services.Servicies
 
         public async Task<Result<AddressDTO>> GetUserAddressAsync(string email)
         {
-
             var User = await userManager.Users.Include(u => u.Address).FirstOrDefaultAsync(e => e.Email == email);
 
             if (User == null)
-                return Error.NotFound("User Not Found", $"Uer With Email {email} is not Found");
+                return Error.NotFound("User Not Found", $"User With Email {email} is not Found");
 
             if (User.Address == null)
                 return Error.NotFound("Address Not Found", "This user has no address set yet");
 
-
-
-            else
-            {
-                var MappedAddress = mapper.Map<AddressDTO>(User.Address);
-
-                return Result<AddressDTO>.Ok(MappedAddress);
-            }
-
+            var MappedAddress = mapper.Map<AddressDTO>(User.Address);
+            return Result<AddressDTO>.Ok(MappedAddress);
         }
 
         public async Task<Result<UserDTO>> LoginAsync(LoginDTO loginDTO)
         {
-            //check first if the user exist in the database by email
-
             var user = await userManager.FindByEmailAsync(loginDTO.Email);
             if (user == null)
-            {
                 return Error.InvalidCredentials("Invalid email or password", "Invalid email or password");
-            }
-            //if not exist return fail result with error message "Invalid email or password"
-            //if exist check if the password is correct
+
             var isPasswordCorrect = await userManager.CheckPasswordAsync(user, loginDTO.Password);
             if (!isPasswordCorrect)
-            {
                 return Error.InvalidCredentials("Invalid email or password", "Invalid email or password");
-            }
+
             var refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await userManager.UpdateAsync(user);
+
             var userDTO = new UserDTO(Email: user.Email!, user.DisplayName, Token: await GenerateJWTToken(user), RefreshToken: refreshToken);
             return Result<UserDTO>.Ok(userDTO);
-            //if not correct return fail result with error message "Invalid email or password"
-            //if correct generate a token for the user and return ok result with the userDTO
-
         }
 
         public async Task<Result<UserDTO>> RegisterAsync(RegisterDTO registerDTO)
         {
-
-
-
-
-
             var user = new AppUser
             {
                 Email = registerDTO.Email,
                 DisplayName = registerDTO.DisplayName,
                 UserName = registerDTO.UserName,
                 PhoneNumber = registerDTO.PhoneNumber
-
-
-
             };
 
             var result = await userManager.CreateAsync(user, registerDTO.Password);
             if (result.Succeeded)
             {
+                await userManager.AddToRoleAsync(user, role: "User");
+
                 var refreshToken = GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-                await userManager.UpdateAsync(user);        // only runs if user was created to save it in the DB
+                await userManager.UpdateAsync(user);
 
                 return Result<UserDTO>.Ok(new UserDTO(
                     Email: user.Email!,
@@ -168,89 +125,45 @@ namespace ECommerce.Services.Servicies
                 return Result<UserDTO>.Fail(
                     result.Errors.Select(e => Error.Validation(code: e.Code, description: e.Description)).ToList());
             }
-
         }
 
         public async Task<string> GenerateJWTToken(AppUser appUser)
         {
-            //creating the claims for the user
-
             var Roles = await userManager.GetRolesAsync(appUser);
 
             var Claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email,appUser.Email),
-                new Claim(ClaimTypes.NameIdentifier,appUser.Id),
-                new Claim(ClaimTypes.Name,appUser.UserName),
-
+                new Claim(ClaimTypes.Email, appUser.Email),
+                new Claim(ClaimTypes.NameIdentifier, appUser.Id),
+                new Claim(ClaimTypes.Name, appUser.UserName),
             };
 
             foreach (var role in Roles)
-            {
                 Claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            //get the secret key from the configuration and create a symmetric security key
 
             var securityKey = configuration["JwtOptions:securityKey"];
             if (string.IsNullOrEmpty(securityKey))
                 throw new InvalidOperationException("JwtOptions:securityKey missing from configuration.");
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
-
-            //add the signing credentials
-
             var SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var issuer = configuration["JwtOptions:Issuer"];
             var audience = configuration["JwtOptions:Audience"];
 
-
-            //build the token
             var token = new JwtSecurityToken(
                 claims: Claims,
                 expires: DateTime.Now.AddHours(2),
                 signingCredentials: SigningCredentials,
                 issuer: issuer,
                 audience: audience
-
-
-
-                );
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-
         }
-
-
-
 
         public async Task<Result<UserDTO>> RefreshTokenAsync(RefreshTokenDTO refreshTokenDTO)
         {
-            // Step 1: extract claims from the EXPIRED access token
-            // We use ValidateLifetime = false on purpose — the token IS expired, that's fine
-
-            #region explain step 1 
-
-            /*
-            
-            Client sends: { accessToken: "eyJhbGci...", refreshToken: "k9Xm2..." }
-                                  ↓
-                      Is this a valid JWT structure?
-                      Was it signed by OUR secret key?
-                                  ↓
-                      NO  → catch → return 401 immediately
-                                  ↓
-                      YES → extract claims → get email from principal
-                                  ↓
-                      use email to find user in DB → continue refresh logic
-
-
-             
-             */
-
-            #endregion
-
-
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -259,8 +172,8 @@ namespace ECommerce.Services.Servicies
                 ValidAudience = configuration["JwtOptions:Audience"],
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(configuration["JwtOptions:securityKey"]!)),
-                ValidateLifetime = false // ← key: we allow expired tokens here
+                    Encoding.UTF8.GetBytes(configuration["JwtOptions:securityKey"]!)),
+                ValidateLifetime = false
             };
 
             ClaimsPrincipal principal;
@@ -274,21 +187,16 @@ namespace ECommerce.Services.Servicies
                 return Error.InvalidCredentials("Invalid token", "Access token is invalid");
             }
 
-
-
-            // Step 2: get user from DB using the email claim in the expired token
             var email = principal.FindFirstValue(ClaimTypes.Email);
             var user = await userManager.FindByEmailAsync(email!);
 
-
             if (user is null ||
-            user.RefreshToken != refreshTokenDTO.RefreshToken ||
-            user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                user.RefreshToken != refreshTokenDTO.RefreshToken ||
+                user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
                 return Error.InvalidCredentials("Invalid refresh token", "Refresh token is invalid or expired");
             }
 
-            // Step 4: generate new pair and rotate (old refresh token is replaced)
             var newAccessToken = await GenerateJWTToken(user);
             var newRefreshToken = GenerateRefreshToken();
 
@@ -298,10 +206,6 @@ namespace ECommerce.Services.Servicies
 
             return Result<UserDTO>.Ok(new UserDTO(user.Email!, user.DisplayName, newAccessToken, newRefreshToken));
         }
-
-
-
-        //Adding OAuth by Google 
 
         public async Task<Result<UserDTO>> HandleGoogleLoginAsync(string email, string name, string googleId)
         {
@@ -314,7 +218,7 @@ namespace ECommerce.Services.Servicies
                     UserName = email,
                     Email = email,
                     DisplayName = name,
-                    EmailConfirmed = true // Google already verified the email
+                    EmailConfirmed = true
                 };
 
                 var createResult = await userManager.CreateAsync(user);
@@ -322,11 +226,17 @@ namespace ECommerce.Services.Servicies
                     return Result<UserDTO>.Fail(
                         createResult.Errors.Select(e => Error.Validation(e.Code, e.Description)).ToList());
 
-                await userManager.AddLoginAsync(user,
-                    new UserLoginInfo("Google", googleId, "Google"));
+                await userManager.AddToRoleAsync(user, "User");
+                await userManager.AddLoginAsync(user, new UserLoginInfo("Google", googleId, "Google"));
+                user = (await userManager.FindByEmailAsync(email))!;
+            }
+            else
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                if (!roles.Any())
+                    await userManager.AddToRoleAsync(user, "User");
             }
 
-            //Same refresh token pattern as LoginAsync and RegisterAsync
             var refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
@@ -342,8 +252,73 @@ namespace ECommerce.Services.Servicies
             ));
         }
 
+        public async Task<Result<string>> AssignRoleAsync(AssignRoleDTO assignRoleDTO)
+        {
+            var User = await userManager.FindByEmailAsync(assignRoleDTO.UserEmail);
 
+            if (User == null)
+                return Error.NotFound("User Not Found", $"User With Email {assignRoleDTO.UserEmail} is not Found");
 
+            var RoleExists = await roleManager.RoleExistsAsync(assignRoleDTO.RoleName);
 
+            if (!RoleExists)
+                return Error.NotFound("Role Not Found", $"Role With Name {assignRoleDTO.RoleName} is not Found");
+
+            var result = await userManager.AddToRoleAsync(User, assignRoleDTO.RoleName);
+
+            if (!result.Succeeded)
+                return Error.Failure("Failed to assign role", $"Failed to assign role {assignRoleDTO.RoleName} to user {assignRoleDTO.UserEmail}");
+
+            return Result<string>.Ok($"Role {assignRoleDTO.RoleName} assigned to user {assignRoleDTO.UserEmail} successfully");
+        }
+
+        public async Task<Result<IEnumerable<UserDTO>>> GetAllUsersAsync()
+        {
+            var users = await userManager.Users.ToListAsync();
+
+            var userDTOs = users.Select(u => new UserDTO(
+                Email: u.Email!,
+                DisplayName: u.DisplayName,
+                Token: string.Empty,
+                RefreshToken: string.Empty
+            )).ToList();
+
+            return Result<IEnumerable<UserDTO>>.Ok(userDTOs);
+        }
+
+        public async Task<Result<string>> DeleteUserAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return Error.NotFound("User Not Found", $"User with email {email} was not found");
+
+            var result = await userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+                return Result<string>.Fail(
+                    result.Errors.Select(e => Error.Validation(e.Code, e.Description)).ToList());
+
+            return Result<string>.Ok($"User {email} deleted successfully");
+        }
+
+        public async Task<Result<string>> RevokeRefreshTokenAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return Error.NotFound("User Not Found", $"User with email {email} was not found");
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddYears(-1); // expired in the past
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return Result<string>.Fail(
+                    result.Errors.Select(e => Error.Validation(e.Code, e.Description)).ToList());
+
+            return Result<string>.Ok($"Refresh token for {email} revoked successfully");
+        }
     }
 }
