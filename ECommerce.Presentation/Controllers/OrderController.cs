@@ -64,5 +64,35 @@ namespace ECommerce.Presentation.Controllers
             var result = await orderService.GetOrderById(orderId);
             return HandleResult(result);
         }
+
+        /// <summary>
+        /// Admin: update an order's status (e.g. Paid, Preparing, Shipped, Delivered, Cancelled).
+        /// Invalidates the cached admin listing so dashboards reflect the change immediately.
+        /// </summary>
+        [HttpPatch("{orderId}/status")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<ActionResult<OrderToReturnDTO>> UpdateOrderStatus(Guid orderId, [FromBody] UpdateOrderStatusDTO body)
+        {
+            if (body is null || string.IsNullOrWhiteSpace(body.Status))
+                return BadRequest(new { error = "Status is required." });
+
+            var result = await orderService.UpdateOrderStatusAsync(orderId, body.Status);
+
+            if (result.isSuccess)
+            {
+                // best-effort cache invalidation — cached entries are per-user so we
+                // only have a guaranteed key for admin listings; per-user listings and
+                // by-id caches will expire via TTL (60m) or be refreshed on next write.
+                var cacheService = HttpContext.RequestServices.GetRequiredService<ICacheService>();
+                try
+                {
+                    await cacheService.RemoveAsync("/api/Order/Admin/AllOrders");
+                    await cacheService.RemoveAsync($"/api/Order/{orderId}");
+                }
+                catch { /* swallow — cache eviction failures must not break the update */ }
+            }
+
+            return HandleResult(result);
+        }
     }
 }

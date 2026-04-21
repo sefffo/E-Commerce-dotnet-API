@@ -124,6 +124,36 @@ namespace ECommerce.Services.Servicies
             return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
         }
 
+        public async Task<Result<OrderToReturnDTO>> UpdateOrderStatusAsync(Guid orderId, string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+                return Error.Validation("Invalid status", "Status is required.");
+
+            if (!Enum.TryParse<OrderStatus>(status, ignoreCase: true, out var parsed) || !Enum.IsDefined(typeof(OrderStatus), parsed))
+                return Error.Validation(
+                    "Invalid status",
+                    $"'{status}' is not a valid order status. Allowed: {string.Join(", ", Enum.GetNames(typeof(OrderStatus)))}.");
+
+            var spec = new OrderSpecifications(orderId);
+            var order = await unitOfWork.GetRepository<Order, Guid>().GetByIdAsync(spec);
+
+            if (order is null)
+                return Error.NotFound("Order not found", $"Order with Id: {orderId} was not found");
+
+            // no-op if already in the target state
+            if (order.Status == parsed)
+                return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
+
+            order.Status = parsed;
+            unitOfWork.GetRepository<Order, Guid>().Update(order);
+
+            var res = await unitOfWork.SaveChangesAsync();
+            if (res == 0)
+                return Error.InternalServerError("Order update failed", "Could not persist the new order status.");
+
+            return Result<OrderToReturnDTO>.Ok(mapper.Map<OrderToReturnDTO>(order));
+        }
+
         public async Task<bool> SaveInvoiceIdAsync(Guid orderId, string invoiceId)
         {
             var spec = new OrderSpecifications(orderId);
