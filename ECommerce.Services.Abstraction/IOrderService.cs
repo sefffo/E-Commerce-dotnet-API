@@ -14,6 +14,9 @@ namespace ECommerce.Services.Abstraction
         Task<Result<IEnumerable<OrderToReturnDTO>>> GetAllOrdersForAdminAsync();
         Task<Result<OrderToReturnDTO>> GetOrderById(Guid orderId);
 
+        // admin: change the order status (e.g. Paid -> Preparing -> Shipped -> Delivered / Cancelled)
+        Task<Result<OrderToReturnDTO>> UpdateOrderStatusAsync(Guid orderId, string status);
+
         // payment related
         Task<bool> SaveInvoiceIdAsync(Guid orderId, string invoiceId);
         Task<bool> MarkOrderAsPaidAsync(string invoiceId);
