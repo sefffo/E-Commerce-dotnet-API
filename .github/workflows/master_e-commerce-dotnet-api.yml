@@ -59,6 +59,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'e-commerce-dotnet-api-dkbsfuhaffbxhfar'
+          app-name: 'E-Commerce-dotnet-API'
           slot-name: 'Production'
           package: .
