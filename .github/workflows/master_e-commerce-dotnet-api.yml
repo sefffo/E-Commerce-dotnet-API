@@ -21,7 +21,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.x'
+          dotnet-version: 'dotnet10.x'
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -47,13 +47,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F2F66136203D42A4BDE79FB33E50F61A }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7A49211A55674E52AF88C6B8D8336C1A }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4F1F92D53DB246DCB14CFDFD3B259E44 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C97782605E67469AA57A0FAD2E285173 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8D1EF7A796B748A98380D5739F9FE026 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_15AEAF9F3C6C4B258EF43DA9B4C49BA4 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -62,3 +62,4 @@ jobs:
           app-name: 'E-Commerce-dotnet-API'
           slot-name: 'Production'
           package: .
+          
