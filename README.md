@@ -4,10 +4,10 @@
 
 ### Production-grade ASP.NET Core 10 Web API — Clean Architecture, JWT Auth, Docker, Redis, Stripe & Fawaterak, Azure CI/CD
 
-[![Live API](https://img.shields.io/badge/Live%20API-Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html)
+[![Live API](https://img.shields.io/badge/Live%20API-Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://e-commerce-dotnet-api-dkbsfuhaffbxhfar.francecentral-01.azurewebsites.net/swagger/index.html)
 [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-saif31%2Fecomm--api-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/saif31/ecomm-api)
 [![Dashboard](https://img.shields.io/badge/Admin%20Dashboard-Live-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://ecommerce-dashboard-one-tawny.vercel.app/)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/sefffo/Web-API-Revision/actions)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/sefffo/E-Commerce-dotnet-API/actions)
 
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![C#](https://img.shields.io/badge/C%23-12.0-239120?logo=c-sharp&logoColor=white)](https://learn.microsoft.com/en-us/dotnet/csharp/)
@@ -24,7 +24,7 @@
 | Resource | Link |
 |---|---|
 | 🎛️ **Admin Dashboard** | <https://ecommerce-dashboard-one-tawny.vercel.app/> |
-| 📖 **Live API + Swagger** | <https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html> |
+| 📖 **Live API + Swagger** | <https://e-commerce-dotnet-api-dkbsfuhaffbxhfar.francecentral-01.azurewebsites.net/swagger/index.html> |
 | 🐳 **Docker Image** | <https://hub.docker.com/r/saif31/ecomm-api> — `docker pull saif31/ecomm-api:latest` |
 | 💻 **Frontend Repo** | <https://github.com/sefffo/ecommerce-dashboard> |
 
@@ -133,7 +133,7 @@ A full-featured e-commerce backend built from the ground up with production conc
 | **Mapping** | AutoMapper |
 | **Docs** | Swashbuckle (Swagger) |
 | **Container** | Docker (multi-stage) + Docker Compose |
-| **Cloud** | Azure App Service (East Asia) |
+| **Cloud** | Azure App Service (France Central) |
 | **CI/CD** | GitHub Actions |
 
 </div>
@@ -186,7 +186,7 @@ A full-featured e-commerce backend built from the ground up with production conc
 ## 📂 Project Structure
 
 ```
-Web-API-Revision/
+E-Commerce-dotnet-API/
 ├── ECommerce.Domain/                    # Pure entities + interfaces
 │   ├── Entities/
 │   │   ├── IdentityModule/              # User, RefreshToken
@@ -313,8 +313,8 @@ Both live behind `IPaymentService` so the controller doesn't care which one ran.
 ### Option A — Docker Compose (easiest)
 
 ```bash
-git clone https://github.com/sefffo/Web-API-Revision.git
-cd Web-API-Revision
+git clone https://github.com/sefffo/E-Commerce-dotnet-API.git
+cd E-Commerce-dotnet-API
 docker-compose up --build
 ```
 
@@ -390,26 +390,25 @@ docker run -p 5262:8080 \
                ▼
 ┌──────────────────────────────┐       ┌──────────────────────┐
 │   GitHub Actions Runner      │       │   Azure App Service  │
-│                              │       │   Web-API-Revesion   │
-│  1. Checkout                 │       │   (East Asia)        │
-│  2. Setup .NET 10 SDK        │       │                      │
-│  3. dotnet restore           │       │  Receives: /publish  │
-│  4. dotnet build -c Release  │       │  Zero-downtime swap  │
-│  5. dotnet publish           │ ───▶  │  Live in ~45s        │
+│                              │       │   (France Central)   │
+│  1. Checkout                 │       │                      │
+│  2. Setup .NET 10 SDK        │       │  Receives: /publish  │
+│  3. dotnet restore           │       │  Zero-downtime swap  │
+│  4. dotnet build -c Release  │ ───▶  │  Live in ~45s        │
+│  5. dotnet publish           │       │                      │
 │  6. azure/webapps-deploy@v3  │       │                      │
 └──────────────────────────────┘       └──────────────────────┘
 ```
 
 - **Trigger:** `push` to `master` + manual `workflow_dispatch`
-- **Secret:** `AZURE_WEBAPP_PUBLISH_PROFILE` stored in GitHub repo secrets
-- **Deploy target:** `Web-API-Revesion` on Azure App Service
+- **Deploy target:** Azure App Service (France Central)
 - **Deploy time:** ~90 seconds end-to-end
 
 ---
 
 ## 📖 API Reference
 
-Full interactive docs at the **[Swagger UI](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html)**. Highlights:
+Full interactive docs at the **[Swagger UI](https://e-commerce-dotnet-api-dkbsfuhaffbxhfar.francecentral-01.azurewebsites.net/swagger/index.html)**. Highlights:
 
 ### Authentication
 | Method | Endpoint | Description |
@@ -487,7 +486,7 @@ This project was my deep-dive into **production software engineering**, not tuto
 
 ### 🔗 Related
 
-[**Frontend (React Dashboard)**](https://github.com/sefffo/ecommerce-dashboard) · [**Docker Hub**](https://hub.docker.com/r/saif31/ecomm-api) · [**Live Swagger**](https://web-api-revesion-c2chh0cyctd7dpcn.eastasia-01.azurewebsites.net/swagger/index.html) · [**Live Dashboard**](https://ecommerce-dashboard-one-tawny.vercel.app/)
+[**Frontend (React Dashboard)**](https://github.com/sefffo/ecommerce-dashboard) · [**Docker Hub**](https://hub.docker.com/r/saif31/ecomm-api) · [**Live Swagger**](https://e-commerce-dotnet-api-dkbsfuhaffbxhfar.francecentral-01.azurewebsites.net/swagger/index.html) · [**Live Dashboard**](https://ecommerce-dashboard-one-tawny.vercel.app/)
 
 ---
 
